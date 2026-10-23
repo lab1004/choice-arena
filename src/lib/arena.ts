@@ -2,9 +2,13 @@ import {
   arrayUnion,
   doc,
   FieldPath,
+  getDocFromServer,
   runTransaction,
   serverTimestamp,
+  snapshotEqual,
+  type DocumentSnapshot,
   type Firestore,
+  type Transaction,
 } from "firebase/firestore";
 import {
   GAME_CONFIG,
@@ -16,6 +20,54 @@ import {
   type Profile,
 } from "../domain/game";
 import { ArenaError } from "./errors";
+
+// Rules may reject a stale optimistic write before the backend reports ABORTED.
+// Retry the entire transaction only if a document it read has actually changed.
+// Genuine authorization failures remain failures; no rules are relaxed.
+async function membershipTransaction<T>(
+  db: Firestore,
+  operation: (
+    tx: Transaction,
+    observe: (...snapshots: DocumentSnapshot[]) => void,
+  ) => Promise<T>,
+): Promise<T> {
+  const attempts = 4;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    const observed: DocumentSnapshot[] = [];
+    try {
+      return await runTransaction(db, (tx) => {
+        observed.length = 0;
+        return operation(tx, (...snapshots) => observed.push(...snapshots));
+      });
+    } catch (error) {
+      if (
+        !(
+          error instanceof Error &&
+          "code" in error &&
+          error.code === "permission-denied"
+        ) ||
+        attempt === attempts - 1
+      )
+        throw error;
+      let changed = false;
+      for (const before of observed) {
+        try {
+          if (!snapshotEqual(before, await getDocFromServer(before.ref))) {
+            changed = true;
+            break;
+          }
+        } catch {
+          /* A revoked read is not evidence that retrying is safe. */
+        }
+      }
+      if (!changed) throw error;
+      await new Promise((resolve) =>
+        setTimeout(resolve, 50 * (attempt + 1) + Math.random() * 100),
+      );
+    }
+  }
+  throw new ArenaError("aborted");
+}
 export async function saveProfile(
   db: Firestore,
   uid: string,
@@ -42,7 +94,7 @@ export async function createRoom(
 ): Promise<string> {
   for (let attempt = 0; attempt < 8; attempt++) {
     const code = nextCode();
-    const result = await runTransaction(db, async (tx) => {
+    const result = await membershipTransaction(db, async (tx, observe) => {
       const directory = doc(db, "roomCodes", code);
       const session = doc(db, "sessions", uid);
       const [existing, current, profile] = await Promise.all([
@@ -50,6 +102,7 @@ export async function createRoom(
         tx.get(session),
         tx.get(doc(db, "profiles", uid)),
       ]);
+      observe(current, existing, profile);
       if (current.data()?.roomCode) throw new ArenaError("already-in-room");
       if (!profile.exists()) throw new ArenaError("profile-required");
       if (existing.exists()) return false;
@@ -78,7 +131,7 @@ export async function createRoom(
 export async function joinRoom(db: Firestore, uid: string, input: string) {
   const code = normalizeCode(input);
   if (!validCode(code)) throw new ArenaError("invalid-code");
-  await runTransaction(db, async (tx) => {
+  await membershipTransaction(db, async (tx, observe) => {
     const directory = doc(db, "roomCodes", code);
     const session = doc(db, "sessions", uid);
     const [room, current, profile] = await Promise.all([
@@ -86,6 +139,7 @@ export async function joinRoom(db: Firestore, uid: string, input: string) {
       tx.get(session),
       tx.get(doc(db, "profiles", uid)),
     ]);
+    observe(current, room, profile);
     if (current.data()?.roomCode === code) return;
     if (current.data()?.roomCode) throw new ArenaError("already-in-room");
     if (!room.exists()) throw new ArenaError("room-not-found");
@@ -146,13 +200,15 @@ export async function transferHost(
   });
 }
 export async function leaveRoom(db: Firestore, uid: string) {
-  await runTransaction(db, async (tx) => {
+  await membershipTransaction(db, async (tx, observe) => {
     const session = doc(db, "sessions", uid);
     const current = await tx.get(session);
+    observe(current);
     const code = current.data()?.roomCode;
     if (!code) return;
     const ref = doc(db, "rooms", code);
     const snap = await tx.get(ref);
+    observe(snap);
     if (!snap.exists()) {
       tx.set(session, { roomCode: null });
       return;

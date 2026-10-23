@@ -158,6 +158,10 @@ describe("room lifecycle and transaction races", () => {
     const results = await Promise.allSettled(
       users.map((p) => joinRoom(p.db, p.uid, code)),
     );
+    for (const result of results) {
+      if (result.status === "rejected")
+        expect(result.reason).toMatchObject({ code: "room-full" });
+    }
     expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(
       GAME_CONFIG.maxPlayers - 1,
     );
@@ -265,6 +269,9 @@ describe("room lifecycle and transaction races", () => {
       leaveRoom(host, "host"),
       joinRoom(guest, "guest", code),
     ]);
+    if (results[0].status === "rejected") throw results[0].reason;
+    if (results[1].status === "rejected")
+      expect(results[1].reason).toMatchObject({ code: "room-not-found" });
     expect(results[0].status).toBe("fulfilled");
     const directory = await getDoc(doc(guest, "roomCodes", code));
     if (results[1].status === "fulfilled") {
