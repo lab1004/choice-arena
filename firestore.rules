@@ -1,0 +1,131 @@
+// GENERATED from firestore.rules.template and game.config.json. Run npm run rules:generate.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function own(uid) { return signedIn() && request.auth.uid == uid; }
+    function codeValid(code) { return code.matches('^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$'); }
+    function capacityLimit() { return 3; }
+    function sessionPath(uid) { return /databases/$(database)/documents/sessions/$(uid); }
+    function roomPath(code) { return /databases/$(database)/documents/rooms/$(code); }
+    function directoryPath(code) { return /databases/$(database)/documents/roomCodes/$(code); }
+    function freeBefore() {
+      return !exists(sessionPath(request.auth.uid)) || get(sessionPath(request.auth.uid)).data.roomCode == null;
+    }
+    function sessionAfter(code) { return getAfter(sessionPath(request.auth.uid)).data.roomCode == code; }
+    function directoryMatches(code, room) {
+      let directory = getAfter(directoryPath(code)).data;
+      return directory.playerCount == room.memberIds.size() && directory.maxPlayers == room.maxPlayers;
+    }
+    function memberValid(member) {
+      return member is map && member.keys().hasAll(['nickname', 'ready'])
+        && member.keys().hasOnly(['nickname', 'ready']) && member.ready is bool
+        && member.nickname is string && member.nickname.matches('^[가-힣a-zA-Z0-9_]{2,12}$');
+    }
+    function joiningMember(room) {
+      let member = room.members[request.auth.uid];
+      return memberValid(member) && member.ready == false
+        && member.nickname == get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.nickname;
+    }
+    function roomValid(room) {
+      return room.keys().hasAll(['hostId','maxPlayers','status','memberIds','members','createdAt','updatedAt'])
+        && room.keys().hasOnly(['hostId','maxPlayers','status','memberIds','members','createdAt','updatedAt'])
+        && room.maxPlayers == capacityLimit() && room.status == 'waiting'
+        && room.memberIds is list && room.memberIds.size() > 0 && room.memberIds.size() <= room.maxPlayers
+        && room.memberIds.toSet().size() == room.memberIds.size()
+        && room.members is map && room.members.keys().toSet() == room.memberIds.toSet()
+        && room.hostId in room.memberIds && room.createdAt is timestamp && room.updatedAt == request.time;
+    }
+    match /profiles/{uid} {
+      allow get: if signedIn();
+      allow create, update: if own(uid)
+        && request.resource.data.keys().hasAll(['nickname','createdAt','updatedAt'])
+        && request.resource.data.keys().hasOnly(['nickname','createdAt','updatedAt'])
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.matches('^[가-힣a-zA-Z0-9_]{2,12}$')
+        && request.resource.data.updatedAt == request.time
+        && ((!exists(/databases/$(database)/documents/profiles/$(uid)) && request.resource.data.createdAt == request.time)
+          || (exists(/databases/$(database)/documents/profiles/$(uid)) && request.resource.data.createdAt == resource.data.createdAt));
+    }
+    match /privateProfiles/{uid} {
+      allow get: if own(uid);
+      allow create, update: if own(uid) && request.resource.data.keys().hasAll(['email'])
+        && request.resource.data.keys().hasOnly(['email'])
+        && request.resource.data.email == request.auth.token.get('email', null);
+    }
+    match /sessions/{uid} {
+      allow get: if own(uid);
+      allow create, update: if own(uid)
+        && request.resource.data.keys().hasAll(['roomCode']) && request.resource.data.keys().hasOnly(['roomCode'])
+        && (
+          (request.resource.data.roomCode is string && codeValid(request.resource.data.roomCode)
+            && (freeBefore() || resource.data.roomCode == request.resource.data.roomCode)
+            && uid in getAfter(roomPath(request.resource.data.roomCode)).data.memberIds)
+          || (request.resource.data.roomCode == null
+            && (freeBefore() || !existsAfter(roomPath(resource.data.roomCode))
+              || !(uid in getAfter(roomPath(resource.data.roomCode)).data.memberIds)))
+        );
+    }
+    // Exact invite-code lookup only; contains no identity or lobby information.
+    match /roomCodes/{code} {
+      allow get: if signedIn() && codeValid(code);
+      allow create, update: if signedIn() && codeValid(code)
+        && request.resource.data.keys().hasAll(['playerCount','maxPlayers'])
+        && request.resource.data.keys().hasOnly(['playerCount','maxPlayers'])
+        && request.resource.data.playerCount is int
+        && request.resource.data.maxPlayers == capacityLimit()
+        && request.resource.data.playerCount > 0 && request.resource.data.playerCount <= request.resource.data.maxPlayers
+        && request.resource.data.playerCount == getAfter(roomPath(code)).data.memberIds.size()
+        && (request.auth.uid in getAfter(roomPath(code)).data.memberIds
+          || (exists(roomPath(code)) && request.auth.uid in get(roomPath(code)).data.memberIds));
+      allow delete: if signedIn() && get(roomPath(code)).data.memberIds == [request.auth.uid]
+        && !existsAfter(roomPath(code));
+    }
+    match /rooms/{code} {
+      allow get: if signedIn() && (!exists(roomPath(code)) || request.auth.uid in resource.data.memberIds);
+      allow create: if signedIn() && codeValid(code) && roomValid(request.resource.data)
+        && request.resource.data.memberIds == [request.auth.uid] && request.resource.data.hostId == request.auth.uid
+        && request.resource.data.createdAt == request.time && joiningMember(request.resource.data)
+        && freeBefore() && sessionAfter(code) && directoryMatches(code, request.resource.data);
+      function joined() {
+        let before = resource.data;
+        let after = request.resource.data;
+        let uid = request.auth.uid;
+        return !(uid in before.memberIds) && freeBefore() && sessionAfter(code)
+          && after.diff(before).affectedKeys().hasOnly(['memberIds','members','updatedAt'])
+          && after.memberIds == before.memberIds.concat([uid])
+          && after.members.diff(before.members).affectedKeys().hasOnly([uid]) && joiningMember(after);
+      }
+      function left() {
+        let before = resource.data;
+        let after = request.resource.data;
+        let uid = request.auth.uid;
+        return uid in before.memberIds && sessionAfter(null)
+          && after.diff(before).affectedKeys().hasOnly(['memberIds','members','hostId','updatedAt'])
+          && after.memberIds == before.memberIds.removeAll([uid])
+          && after.members.diff(before.members).affectedKeys().hasOnly([uid])
+          && after.hostId == (before.hostId == uid ? after.memberIds[0] : before.hostId);
+      }
+      function readinessChanged() {
+        let before = resource.data;
+        let after = request.resource.data;
+        let uid = request.auth.uid;
+        return uid in before.memberIds && after.diff(before).affectedKeys().hasOnly(['members','updatedAt'])
+          && after.members.diff(before.members).affectedKeys().hasOnly([uid])
+          && after.members[uid].diff(before.members[uid]).affectedKeys().hasOnly(['ready'])
+          && memberValid(after.members[uid]);
+      }
+      function hostTransferred() {
+        return resource.data.hostId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hostId','updatedAt']);
+      }
+      allow update: if signedIn() && roomValid(request.resource.data)
+        && directoryMatches(code, request.resource.data)
+        && (joined() || left() || readinessChanged() || hostTransferred());
+      allow delete: if signedIn() && resource.data.memberIds == [request.auth.uid]
+        && sessionAfter(null) && !existsAfter(directoryPath(code));
+    }
+    // Future match results, attendance and ranking are server-owned. No client writes.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

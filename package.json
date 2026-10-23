@@ -1,0 +1,44 @@
+{
+  "name": "choice-arena",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run rules:check && npm run typecheck && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "rules:generate": "node scripts/generate-rules.mjs",
+    "rules:check": "node scripts/generate-rules.mjs --check",
+    "test:rules": "firebase emulators:exec --project demo-choice-arena --only firestore 'vitest run'",
+    "emulators": "firebase emulators:start --project demo-choice-arena --only auth,firestore",
+    "test:ui": "playwright test",
+    "format": "prettier --write .",
+    "test:auth": "firebase emulators:exec --project demo-choice-arena --only auth \"playwright test --config playwright.auth.config.ts\""
+  },
+  "dependencies": {
+    "firebase": "^12.0.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.0",
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "firebase-tools": "^14.0.0",
+    "prettier": "^3.9.10",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.0",
+    "vitest": "^3.2.0"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "^1.14.6"
+  }
+}
