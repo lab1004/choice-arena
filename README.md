@@ -4,7 +4,7 @@
 
 ## 로컬 실행
 
-Node.js 22 이상과 npm을 사용합니다.
+Node.js 22.12 이상과 npm을 사용합니다.
 
 ```sh
 npm ci
@@ -107,7 +107,7 @@ Auth 테스트는 `tests/fixtures`에서만 Google 제공자용 Emulator 자격 
 - Chromium 화면/오프라인 테스트 5개: 통과 (320, 390, 768, 1440px, 가로 넘침 없음)
 - Auth Emulator Google 제공자 세션 복원·로그아웃 테스트 1개: 통과
 - 프로덕션 의존성 `npm audit --omit=dev`: 알려진 취약점 0개. Firebase의 Node용 gRPC 전이 의존성은 수정된 1.14.6 이상으로 override했습니다.
-- Firestore 규칙/동시성 테스트 17개: 작성했으나 로컬 실행 차단. 공식 Emulator JAR 다운로드가 이 환경의 네트워크 정책에 의해 `403 Domain forbidden`으로 거부되었습니다. 테스트 통과로 간주하지 않습니다. GitHub Actions에도 실행 단계를 포함했습니다.
+- Firestore 규칙/동시성 테스트 17개: GitHub Actions의 실제 Firestore Emulator에서 모두 통과했습니다. 로컬에서는 공식 Emulator JAR 다운로드가 `403 Domain forbidden`으로 차단되어 CI에서 검증했습니다. 동시 입장·정원 초과·입퇴장 경합과 타인 데이터 수정 차단을 포함합니다.
 - 실제 Google OAuth, 운영 Firestore 연결, 실제 모바일 기기: 미검증
 - 실제 배포/유료 서비스 활성화: 수행하지 않음
 
