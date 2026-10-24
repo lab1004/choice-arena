@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.firebase/
+*-debug.log
+*-debug.*.log
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+*service-account*.json
+*serviceAccount*.json
+*.pem
+*.key
+firebase-export-*/
