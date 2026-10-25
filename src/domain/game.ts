@@ -26,7 +26,10 @@ export interface Scenario {
 export interface ScenarioChoice {
   id: string;
   label: string;
+  /** Match coins change after this choice is resolved. */
   effect: ChoiceEffect;
+  /** Short result text shown to the player after the reveal. */
+  outcome: string;
 }
 export interface Profile {
   nickname: string;
