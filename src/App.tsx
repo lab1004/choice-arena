@@ -100,6 +100,11 @@ function Frame({ arena }: { arena: Arena }) {
           </button>
         </div>
       )}
+      {arena.code && arena.online && !arena.canMutate && (
+        <p className="notice" role="status">
+          서버 연결을 확인하고 있어요. 확인 후 방을 변경할 수 있어요.
+        </p>
+      )}
       {arena.busy && (
         <p role="status" className="busy-toast">
           {arena.busy}…
@@ -223,6 +228,13 @@ function Play({ arena }: { arena: Arena }) {
 }
 function RoomPage({ arena }: { arena: Arena }) {
   const { roomId } = useParams();
+  const navigate = useNavigate();
+  const wasMember = useRef(false);
+  useEffect(() => {
+    if (arena.code === roomId) wasMember.current = true;
+    else if (wasMember.current && !arena.code)
+      navigate("/play", { replace: true });
+  }, [arena.code, roomId, navigate]);
   if (!roomId || !validCode(roomId) || arena.code !== roomId)
     return (
       <Page title="참가 권한을 확인해 주세요">
@@ -335,6 +347,7 @@ function Settings({ arena }: { arena: Arena }) {
           onSubmit={(e) => {
             e.preventDefault();
             setMessage("저장 중");
+            setNickname(nickname.trim());
             void arena.saveNickname(nickname.trim());
           }}
         >
