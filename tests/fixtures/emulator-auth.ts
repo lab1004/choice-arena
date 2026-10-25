@@ -5,10 +5,11 @@ export async function signInForAuthTest() {
   if (!usingEmulators || !auth.emulatorConfig)
     throw new Error("Auth Emulator required");
   await authReady;
+  const id = crypto.randomUUID();
   const credential = GoogleAuthProvider.credential(
     JSON.stringify({
-      sub: crypto.randomUUID(),
-      email: "browser-test@example.com",
+      sub: id,
+      email: `${id}@example.com`,
       email_verified: true,
       name: "Emulator Test",
     }),
