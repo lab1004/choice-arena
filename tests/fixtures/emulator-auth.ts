@@ -7,7 +7,7 @@ export async function signInForAuthTest() {
   await authReady;
   const credential = GoogleAuthProvider.credential(
     JSON.stringify({
-      sub: "choice-arena-browser-test",
+      sub: crypto.randomUUID(),
       email: "browser-test@example.com",
       email_verified: true,
       name: "Emulator Test",
