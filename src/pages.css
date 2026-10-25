@@ -42,23 +42,6 @@
   border-radius: 10px;
   margin-top: 16px;
 }
-.common-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 24px 0;
-}
-.common-nav a {
-  min-height: 44px;
-  min-width: 44px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  color: var(--muted);
-}
-.common-nav a.active {
-  background: #303b28;
-  color: var(--lime);
-}
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -90,12 +73,6 @@
 }
 .profile-stats dt {
   color: var(--muted);
-}
-.practice {
-  margin-top: 20px;
-}
-.practice button {
-  margin-top: 20px;
 }
 .sound-toggle {
   display: flex;
@@ -144,12 +121,6 @@
   .routed .site-header {
     height: 80px;
   }
-  .common-nav {
-    gap: 4px;
-  }
-  .common-nav a {
-    padding: 10px;
-  }
   .route-page {
     margin-top: 24px;
   }
@@ -162,4 +133,21 @@
   .route-page .player-actions {
     margin-left: auto;
   }
+}
+
+.menu-card:first-child {
+  grid-column: 1 / -1;
+  background: linear-gradient(120deg, #283324, var(--panel));
+  border-color: #46563a;
+}
+.route-page > .route-link {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+.profile-stats {
+  margin-bottom: 0;
+}
+.profile-stats dd {
+  font-size: 24px;
+  font-weight: 700;
 }

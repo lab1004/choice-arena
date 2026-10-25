@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   BrowserRouter,
   Link,
-  NavLink,
   Navigate,
   Outlet,
   Route,
@@ -29,7 +28,6 @@ const menu = [
   ["/attendance", "출석", "오늘의 출석과 보상"],
   ["/ranking", "랭킹", "선택으로 쌓아갈 순위"],
   ["/history", "내 기록", "경기와 선택 돌아보기"],
-  ["/customize", "꾸미기", "나만의 외형 아이템"],
   ["/settings", "설정", "닉네임과 소리 설정"],
 ];
 function Page({ title, children }: { title: string; children: ReactNode }) {
@@ -56,7 +54,6 @@ function Gate({ arena }: { arena: Arena }) {
 function Frame({ arena }: { arena: Arena }) {
   const location = useLocation();
   const main = useRef<HTMLElement>(null);
-  const focused = /^\/(rooms|matches)\//.test(location.pathname);
   useEffect(() => {
     document.title = "초이스 아레나";
     main.current?.focus();
@@ -109,21 +106,6 @@ function Frame({ arena }: { arena: Arena }) {
         <p role="status" className="busy-toast">
           {arena.busy}…
         </p>
-      )}
-      {arena.user && arena.profile && !focused && (
-        <nav className="common-nav" aria-label="공통 메뉴">
-          {[
-            ["/home", "홈"],
-            ["/history", "내 기록"],
-            ["/ranking", "랭킹"],
-            ["/customize", "꾸미기"],
-            ["/settings", "설정"],
-          ].map(([url, label]) => (
-            <NavLink key={url} to={url}>
-              {label}
-            </NavLink>
-          ))}
-        </nav>
       )}
       <main id="page-content" ref={main} tabIndex={-1}>
         <Outlet />
@@ -182,13 +164,9 @@ function Home({ arena }: { arena: Arena }) {
             <dt>보유 포인트</dt>
             <dd>준비 중</dd>
           </div>
-          <div>
-            <dt>티어</dt>
-            <dd>준비 중</dd>
-          </div>
         </dl>
         <p className="field-hint">
-          포인트와 티어는 경기·보상 시스템 연결 후 제공됩니다.
+          포인트는 경기·보상 시스템 연결 후 제공됩니다.
         </p>
         {arena.code && (
           <Link className="primary route-link" to={`/rooms/${arena.code}`}>
@@ -215,14 +193,10 @@ function Play({ arena }: { arena: Arena }) {
   if (arena.code) return <Loading />;
   return (
     <Page title="어떻게 플레이할까요?">
+      <Link className="route-link" to="/home">
+        ← 메인 메뉴
+      </Link>
       <HomeActions arena={arena} />
-      <section className="panel practice">
-        <h2>혼자 연습</h2>
-        <p>연습 경기는 준비 중입니다. 아직 경기나 보상이 생성되지 않습니다.</p>
-        <button className="secondary" disabled>
-          혼자 연습 · 준비 중
-        </button>
-      </section>
     </Page>
   );
 }
@@ -284,15 +258,11 @@ const pending: Record<string, [string, string]> = {
   ],
   ranking: [
     "랭킹",
-    "닉네임과 티어로 구성된 순위는 랭크 시스템 연결 후 제공됩니다. 이메일 등 개인정보는 공개하지 않습니다.",
+    "닉네임으로 구성된 순위는 랭크 시스템 연결 후 제공됩니다. 이메일 등 개인정보는 공개하지 않습니다.",
   ],
   history: [
     "내 기록",
     "경기 목록, 상세 결과와 선택 내역은 실제 경기 기록이 저장되면 제공됩니다.",
-  ],
-  customize: [
-    "꾸미기",
-    "보유 외형 아이템, 포인트 구매와 장착은 준비 중입니다. 경기 능력에 영향을 주지 않는 외형만 제공할 예정입니다.",
   ],
 };
 function Pending({ kind }: { kind: string }) {
@@ -342,6 +312,9 @@ function Settings({ arena }: { arena: Arena }) {
   }, [arena.profile?.nickname, nickname, message]);
   return (
     <Page title="설정">
+      <Link className="route-link" to="/home">
+        ← 메인 메뉴
+      </Link>
       <section className="panel">
         <form
           onSubmit={(e) => {
@@ -425,6 +398,10 @@ export default function App() {
           <Route path="/login" element={<Login arena={arena} />} />
           <Route path="/onboarding" element={<Onboarding arena={arena} />} />
           <Route element={<Gate arena={arena} />}>
+            <Route
+              path="/customize"
+              element={<Navigate to="/home" replace />}
+            />
             <Route path="/home" element={<Home arena={arena} />} />
             <Route path="/play" element={<Play arena={arena} />} />
             <Route path="/rooms/:roomId" element={<RoomPage arena={arena} />} />

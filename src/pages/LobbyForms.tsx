@@ -136,7 +136,6 @@ export function HomeActions({ arena }: { arena: Arena }) {
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck={false}
-              placeholder="ABC234"
             />
             <button
               className="secondary"

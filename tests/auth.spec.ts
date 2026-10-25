@@ -42,8 +42,22 @@ for (const width of [360, 390, 768, 1440]) {
       .getByRole("button", { name: "닉네임 저장하고 시작하기" })
       .click();
     await expect(page).toHaveURL(/\/home$/);
+    await expect(page.getByText("보유 포인트", { exact: true })).toBeVisible();
+    await expect(page.getByText("티어", { exact: true })).toHaveCount(0);
+    await expect(
+      page.getByRole("navigation", { name: "공통 메뉴" }),
+    ).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /꾸미기/ })).toHaveCount(0);
     await page.getByRole("link", { name: /게임 시작/ }).click();
     await expect(page).toHaveURL(/\/play$/);
+    await expect(page.getByRole("heading", { name: "혼자 연습" })).toHaveCount(
+      0,
+    );
+    await expect(page.getByLabel("6자리 방 코드")).not.toHaveAttribute(
+      "placeholder",
+      /.+/,
+    );
+
     await page.getByRole("button", { name: "새로운 방 만들기" }).click();
     await expect(page).toHaveURL(/\/rooms\/[A-Z2-9]{6}$/);
     const roomUrl = page.url();
