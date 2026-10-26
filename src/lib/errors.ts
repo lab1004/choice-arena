@@ -22,6 +22,7 @@ export function errorMessage(error: unknown): string {
     "not-member": "현재 이 방의 참가자가 아니에요. 홈에서 다시 참가해 주세요.",
     "invalid-code":
       "영문 대문자와 숫자로 된 6자리 초대 코드를 입력해 주세요. I, O, 0, 1은 사용하지 않아요.",
+    "nickname-locked": "닉네임 변경 기회를 이미 사용했어요. 닉네임은 다시 바꿀 수 없어요.",
     "invalid-nickname":
       "닉네임은 한글, 영문, 숫자, 밑줄로 2~12자 입력해 주세요.",
     "profile-required": "먼저 게임에서 사용할 닉네임을 설정해 주세요.",
