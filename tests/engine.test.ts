@@ -1,3 +1,4 @@
+import { dailyFor } from "../functions/src/service";
 import { describe, it, expect } from "vitest";
 import {
   newMatch,
@@ -14,7 +15,6 @@ import {
   type Secret,
 } from "../functions/src/shared/model";
 import {
-  assignDaily,
   koreaDay,
   progressDaily,
   QUESTS,
@@ -412,7 +412,7 @@ describe("daily quest data and derived progress", () => {
     const day = koreaDay(Date.parse("2026-10-25T14:59:59Z"));
     expect(day).toBe("2026-10-25");
     expect(koreaDay(Date.parse("2026-10-25T15:00:00Z"))).toBe("2026-10-26");
-    expect(new Set(assignDaily(day, () => 0.3).ids).size).toBe(4);
+    expect(new Set(dailyFor("tester", day).ids).size).toBe(4);
   });
   it("calculates progress only from completed non-forfeited records", () => {
     const x = story();

@@ -20,7 +20,7 @@ React + Vite + TypeScript, Firebase Google Authentication, Firestore, Cloud Func
 
 ## GitHub 추가 작업 통합
 
-추가된 `feature/playable-arena` 커밋 `5f14faf01df253b7a7ad9ee91b8cd5848ffaa6a0`도 비교해 통합했습니다. 해당 브랜치에서 바뀐 ‘폭풍 전의 낡은 다리’ 상황과 세 선택지 수치를 유지했습니다. UID·한국 날짜 해시 기반 일일 퀘스트 고정 배정, 오래된 예약 요청을 거르는 서버 마감 검증도 반영했습니다. 서버·라우팅·시나리오는 한 벌만 유지하며, 테스트는 현재 API/스키마에 맞춰 확장했습니다. 이 브랜치의 데이터 스키마는 아래 표가 기준이며, 이전 실험 브랜치의 `playerStats` 등은 운영 배포/마이그레이션된 것으로 간주하지 않습니다.
+추가된 PR [#4](https://github.com/lab1004/choice-arena/pull/4)의 `feature/playable-arena` 커밋 `5f14faf01df253b7a7ad9ee91b8cd5848ffaa6a0`도 비교해 통합했습니다. 해당 브랜치에서 바뀐 ‘폭풍 전의 낡은 다리’ 상황과 세 선택지 수치를 유지했습니다. UID·한국 날짜 해시 기반 일일 퀘스트 고정 배정, 오래된 예약 요청을 거르는 서버 마감 검증도 반영했습니다. 서버·라우팅·시나리오는 한 벌만 유지하며, 테스트는 현재 API/스키마에 맞춰 확장했습니다. 이 브랜치의 데이터 스키마는 아래 표가 기준이며, 이전 실험 브랜치의 `playerStats` 등은 운영 배포/마이그레이션된 것으로 간주하지 않습니다.
 
 ## 스토리 데이터와 균형
 
@@ -92,7 +92,7 @@ Functions Emulator `5001`, Auth `9099`, Firestore `8080`을 사용합니다. Web
 
 ## 보안 규칙과 인덱스
 
-`firestore.rules.template`과 `game.config.json`에서 규칙을 생성합니다.
+`firestore.rules.template`과 `game.config.json`에서 규칙과 Functions용 설정을 생성합니다. 클라이언트·서버·규칙이 같은 정원과 시작 코인을 사용합니다.
 
 ```sh
 npm run rules:generate
@@ -122,6 +122,8 @@ npm run test:game
 - `auth.spec.ts`: Auth+Firestore+Functions Emulator, 로그인 유지/로그아웃, 360/375/390/768/1440px 가입·경로·새로고침·방 복원
 - `game.spec.ts`: 실제 SDK와 독립 브라우저 2인/3인, 투표→실제 라운드→결과·보상·기록, 중도 포기/관전, 경기 URL 단계 복원과 화면 캡처. 가짜 경기 데이터/응답 mock 없음
 - CI는 위 테스트를 실행하고 `browser-evidence` 아티팩트로 화면/실패 trace를 저장합니다.
+
+2026-10-26 KST, [Verify CI 실행](https://github.com/lab1004/choice-arena/actions/runs/40292427798)에서 **77개 테스트 통과**: 판정 단위 19, Firestore 규칙/서비스 32, 비로그인 화면 18, 인증/경로 6, 다중 브라우저 경기 2. 360·375·390·768·1440px 경기/결과 캡처도 직접 확인했습니다. 2인전은 실제 제한 시간 흐름으로 랜덤 10라운드를 완료했고, 3인전은 스토리/테마 투표 후 중도 포기와 관전을 확인했습니다. 전체 스토리 12라운드는 서버/판정 테스트에서 확인했습니다.
 
 로컬 TypeScript/빌드/단위/UI 테스트는 실행했습니다. 이 개발 환경에서는 `storage.googleapis.com` 다운로드가 차단되어 로컬 Emulator가 시작되지 않았습니다. 따라서 Emulator 실행 결과는 PR의 **Verify CI 실제 결과**를 기준으로 확인하세요. 실제 Google OAuth 팝업과 운영 Firebase 프로젝트는 직접 검증하지 않았습니다. Auth Emulator Google provider 테스트는 운영 OAuth 검증을 대신하지 않습니다.
 

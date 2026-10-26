@@ -79,6 +79,7 @@ export function MatchPage({ arena }: { arena: Arena }) {
     [syncError, setSyncError] = useState(""),
     [choice, setChoice] = useState<ScenarioChoice | null>(null),
     [leaving, setLeaving] = useState(false);
+  const activeMatch = !!m && m.stage !== "finished" && m.stage !== "cancelled";
   const offset = useRef(0);
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -89,7 +90,7 @@ export function MatchPage({ arena }: { arena: Arena }) {
     setChoice(null);
   }, [m?.stage, m?.round]);
   useEffect(() => {
-    if (!m) return;
+    if (!activeMatch) return;
     let active = true,
       inFlight = false;
     setClockReady(false);
@@ -119,7 +120,7 @@ export function MatchPage({ arena }: { arena: Arena }) {
       clearInterval(poll);
       clearInterval(tick);
     };
-  }, [matchId, !!m]);
+  }, [matchId, activeMatch]);
   if (error)
     return (
       <section className="route-page">
@@ -199,9 +200,15 @@ export function MatchPage({ arena }: { arena: Arena }) {
                 ? "중도 포기"
                 : !m.players[id].alive
                   ? "탈락 · 관전"
-                  : m.confirmedIds.includes(id) && !voting
-                    ? "선택 확정"
-                    : "생존"}
+                  : finished
+                    ? m.awards[id]?.winner
+                      ? "우승"
+                      : m.stage === "cancelled"
+                        ? "취소"
+                        : "경기 종료"
+                    : m.confirmedIds.includes(id) && !voting
+                      ? "선택 확정"
+                      : "생존"}
             </span>
           </div>
         ))}

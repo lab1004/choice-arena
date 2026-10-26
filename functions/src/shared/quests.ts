@@ -54,19 +54,6 @@ export interface Daily {
 export function koreaDay(now: number) {
   return new Date(now + 9 * 3600000).toISOString().slice(0, 10);
 }
-export function assignDaily(day: string, random: () => number): Daily {
-  const pool = [...QUESTS];
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  return {
-    day,
-    ids: pool.slice(0, 4).map((q) => q.id),
-    progress: {},
-    claimed: [],
-  };
-}
 export function metrics(m: Match, uid: string): Record<string, number> {
   const p = m.players[uid];
   if (m.stage !== "finished" || p.forfeited) return {};

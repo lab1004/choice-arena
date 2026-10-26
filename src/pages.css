@@ -398,3 +398,7 @@ dialog button {
     font-size: 1.65rem;
   }
 }
+
+.match-page .route-link {
+  margin-right: 8px;
+}
