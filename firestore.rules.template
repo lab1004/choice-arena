@@ -39,14 +39,25 @@ service cloud.firestore {
       allow get: if signedIn();
       allow create, update: if own(uid)
         && request.resource.data.keys().hasAll(['nickname','createdAt','updatedAt'])
-        && request.resource.data.keys().hasOnly(['nickname','avatarId','rankingAnonymous','createdAt','updatedAt'])
+        && request.resource.data.keys().hasOnly(['nickname','nicknameChangeUsed','avatarId','rankingAnonymous','createdAt','updatedAt'])
+        && request.resource.data.get('nicknameChangeUsed', false) is bool
         && request.resource.data.get('avatarId', 'sprout') in ['sprout','moon','comet','wave','sun','leaf']
         && request.resource.data.get('rankingAnonymous', false) is bool
         && request.resource.data.nickname is string
         && request.resource.data.nickname.matches('^[가-힣a-zA-Z0-9_]{2,12}$')
         && request.resource.data.updatedAt == request.time
-        && ((!exists(/databases/$(database)/documents/profiles/$(uid)) && request.resource.data.createdAt == request.time)
-          || (exists(/databases/$(database)/documents/profiles/$(uid)) && request.resource.data.createdAt == resource.data.createdAt));
+        && ((!exists(/databases/$(database)/documents/profiles/$(uid))
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.get('nicknameChangeUsed', false) == false)
+          || (exists(/databases/$(database)/documents/profiles/$(uid))
+            && request.resource.data.createdAt == resource.data.createdAt
+            && (
+              (request.resource.data.nickname == resource.data.nickname
+                && request.resource.data.get('nicknameChangeUsed', false) == resource.data.get('nicknameChangeUsed', false))
+              || (request.resource.data.nickname != resource.data.nickname
+                && resource.data.get('nicknameChangeUsed', false) == false
+                && request.resource.data.get('nicknameChangeUsed', false) == true)
+            )));
     }
     match /privateProfiles/{uid} {
       allow get: if own(uid);
