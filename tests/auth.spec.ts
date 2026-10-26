@@ -23,7 +23,7 @@ test("Firebase Auth Emulator: Google-provider session persists on reload and log
     page.getByRole("button", { name: "Google로 시작하기" }),
   ).toBeEnabled();
 });
-for (const width of [360, 390, 768, 1440]) {
+for (const width of [360, 375, 390, 768, 1440]) {
   test(`${width}px authenticated pages preserve room membership and deny match shortcuts`, async ({
     page,
   }) => {
@@ -38,9 +38,8 @@ for (const width of [360, 390, 768, 1440]) {
     await page.goto("/ranking");
     await expect(page).toHaveURL(/\/onboarding$/);
     await page.getByLabel("게임 닉네임", { exact: true }).fill("선택테스터");
-    await page
-      .getByRole("button", { name: "닉네임 저장하고 시작하기" })
-      .click();
+    await page.getByRole("button", { name: "다음: 프로필 사진" }).click();
+    await page.getByRole("button", { name: "사진 선택 건너뛰고 가입" }).click();
     await expect(page).toHaveURL(/\/home$/);
     await expect(page.getByText("보유 포인트", { exact: true })).toBeVisible();
     await expect(page.getByText("티어", { exact: true })).toHaveCount(0);
@@ -75,7 +74,7 @@ for (const width of [360, 390, 768, 1440]) {
     await page.goBack();
     await expect(page).toHaveURL(roomUrl);
     for (const path of [
-      "/attendance",
+      "/quests",
       "/ranking",
       "/history",
       "/customize",
@@ -93,7 +92,7 @@ for (const width of [360, 390, 768, 1440]) {
       ).toBe(true);
     }
     await expect(
-      page.getByRole("heading", { name: "경기 기능 준비 중" }),
+      page.getByRole("heading", { name: "경기에 접근할 수 없어요" }),
     ).toBeVisible();
     await page.goto("/rooms/ZZZ999");
     await expect(

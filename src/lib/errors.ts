@@ -4,9 +4,15 @@ export class ArenaError extends Error {
   }
 }
 export function errorMessage(error: unknown): string {
+  if (
+    error instanceof Error &&
+    "code" in error &&
+    error.code === "functions/failed-precondition"
+  )
+    return error.message;
   const code =
     typeof error === "object" && error !== null && "code" in error
-      ? String(error.code).replace("firestore/", "")
+      ? String(error.code).replace("firestore/", "").replace("functions/", "")
       : "";
   const messages: Record<string, string> = {
     "room-not-found": "방을 찾을 수 없어요. 초대 코드를 다시 확인해 주세요.",
@@ -23,6 +29,10 @@ export function errorMessage(error: unknown): string {
       "초대 코드를 만들지 못했어요. 잠시 후 다시 시도해 주세요.",
     "permission-denied":
       "접근 권한이 없어요. 로그인 상태와 Firestore 보안 규칙 설정을 확인해 주세요.",
+    internal:
+      "경기 서버에 연결할 수 없어요. 잠시 후 다시 시도해 주세요. 서버가 배포되어 있는지도 확인해 주세요.",
+    "not-found": "요청한 경기 또는 서버를 찾을 수 없어요.",
+    unauthenticated: "로그인 후 다시 시도해 주세요.",
     unavailable:
       "서버에 연결할 수 없어요. 인터넷 연결을 확인한 후 다시 시도해 주세요.",
     offline: "인터넷 연결이 끊겼어요. 다시 연결한 후 시도해 주세요.",

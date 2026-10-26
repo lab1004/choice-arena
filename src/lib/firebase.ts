@@ -1,3 +1,4 @@
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 import { initializeApp } from "firebase/app";
 import {
   browserLocalPersistence,
@@ -23,8 +24,10 @@ const app = initializeApp({
 });
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const functions = getFunctions(app, "asia-northeast3");
 if (usingEmulators) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 }
 export const authReady = setPersistence(auth, browserLocalPersistence);

@@ -3,17 +3,14 @@ import {
   ArrowRight,
   Check,
   ChevronRight,
-  CircleHelp,
   Copy,
   Crown,
   DoorOpen,
   LoaderCircle,
   Plus,
-  ShieldCheck,
-  Sparkles,
   Users,
 } from "lucide-react";
-import { GAME_CONFIG, normalizeCode, validNickname } from "../domain/game";
+import { GAME_CONFIG, normalizeCode } from "../domain/game";
 import type { Arena } from "../lib/useArena";
 export function GoogleMark() {
   return (
@@ -37,71 +34,33 @@ export function GoogleMark() {
     </svg>
   );
 }
-export function NicknameForm({ arena }: { arena: Arena }) {
-  const [nickname, setNickname] = useState("");
-  return (
-    <section className="panel nickname-panel">
-      <span className="icon-tile">
-        <Sparkles />
-      </span>
-      <p className="eyebrow">첫 번째 선택</p>
-      <h2>어떤 이름으로 만날까요?</h2>
-      <p className="muted">
-        게임에서 사용할 닉네임을 정해 주세요.
-        <br />
-        Google 이름과 이메일은 다른 참가자에게 공개되지 않아요.
-      </p>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          void arena.saveNickname(nickname);
-        }}
-      >
-        <label htmlFor="nickname">게임 닉네임</label>
-        <input
-          id="nickname"
-          autoComplete="nickname"
-          autoFocus
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          maxLength={12}
-          placeholder="예: 선택의고수"
-          aria-describedby="nickname-help"
-        />
-        <p id="nickname-help" className="field-hint">
-          한글·영문·숫자·밑줄, 2~12자 / 중복 닉네임 사용 가능
-        </p>
-        <button
-          className="primary full"
-          disabled={
-            !!arena.busy || !arena.online || !validNickname(nickname.trim())
-          }
-        >
-          닉네임 저장하고 시작하기 <ArrowRight size={18} />
-        </button>
-      </form>
-    </section>
-  );
-}
 export function HomeActions({ arena }: { arena: Arena }) {
   const [input, setInput] = useState("");
+  const [maxPlayers, setMaxPlayers] = useState<number>(2);
   const disabled = !!arena.busy || !arena.canMutate;
   return (
     <div className="home-actions">
-      <section className="panel profile-panel">
-        <div className="avatar">{arena.profile?.nickname.slice(0, 1)}</div>
-        <div>
-          <p className="eyebrow">나의 프로필</p>
-          <h2>{arena.profile?.nickname}</h2>
-          <span className="muted small">오늘은 어떤 선택을 해볼까요?</span>
-        </div>
-        <ShieldCheck className="profile-check" size={22} />
-      </section>
       <section className="panel create-panel">
         <div className="card-icon">
           <Plus />
         </div>
         <h2>우리만의 아레나</h2>
+        <fieldset>
+          <legend>게임 인원</legend>
+          <div className="mode-picker">
+            {[2, GAME_CONFIG.maxPlayers].map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={maxPlayers === n ? "primary" : "secondary"}
+                aria-pressed={maxPlayers === n}
+                onClick={() => setMaxPlayers(n)}
+              >
+                {Array.from({ length: n }, () => 1).join(" vs ")}
+              </button>
+            ))}
+          </div>
+        </fieldset>
         <p className="muted">
           방을 만들고 친구를 초대하세요.
           <br />
@@ -110,7 +69,7 @@ export function HomeActions({ arena }: { arena: Arena }) {
         <button
           className="primary full"
           disabled={disabled}
-          onClick={() => void arena.create()}
+          onClick={() => void arena.create(maxPlayers)}
         >
           새로운 방 만들기 <ArrowRight size={18} />
         </button>
@@ -283,20 +242,20 @@ export function Lobby({ arena }: { arena: Arena }) {
       {isHost && (
         <button
           className="secondary full"
-          disabled
+          disabled={
+            disabled ||
+            room.memberIds.length !== room.maxPlayers ||
+            !room.memberIds.every((id) => room.members[id].ready)
+          }
+          onClick={() => void arena.start()}
           aria-describedby="start-help"
         >
-          경기 시작 · 준비 중
+          경기 시작
         </button>
       )}
-      <div id="start-help" className="coming-note">
-        <CircleHelp size={17} />
-        <p>
-          지금은 로그인과 대기실을 이용할 수 있어요.
-          <br />
-          모두 준비해도 경기는 시작되지 않아요.
-        </p>
-      </div>
+      <p id="start-help" className="field-hint">
+        {room.maxPlayers}명이 모두 입장하고 준비하면 방장이 시작할 수 있어요.
+      </p>
       {confirmLeave ? (
         <div className="leave-confirm">
           <p>

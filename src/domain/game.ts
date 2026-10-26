@@ -1,35 +1,10 @@
 import config from "../../game.config.json";
 import type { Timestamp } from "firebase/firestore";
 export const GAME_CONFIG = config;
-export type ScenarioCategory =
-  | "daily"
-  | "survival"
-  | "exploration"
-  | "fantasy"
-  | "sci-fi"
-  | "economy"
-  | "mystery"
-  | "disaster";
-// Future authoritative match engine: never persist rewards through profile edits.
-export interface ChoiceEffect {
-  coins: number;
-  addItems: string[];
-  addStatuses: string[];
-}
-export interface Scenario {
-  id: string;
-  category: ScenarioCategory;
-  title: string;
-  description: string;
-  choices: [ScenarioChoice, ScenarioChoice, ScenarioChoice];
-}
-export interface ScenarioChoice {
-  id: string;
-  label: string;
-  effect: ChoiceEffect;
-}
 export interface Profile {
   nickname: string;
+  avatarId?: string;
+  rankingAnonymous?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -40,7 +15,8 @@ export interface Member {
 export interface Room {
   hostId: string;
   maxPlayers: number;
-  status: "waiting";
+  status: "waiting" | "playing" | "finished";
+  matchId?: string;
   memberIds: string[];
   members: Record<string, Member>;
   createdAt: Timestamp;

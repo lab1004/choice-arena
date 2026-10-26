@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-for (const width of [360, 390, 768, 1440]) {
+for (const width of [360, 375, 390, 768, 1440]) {
   test(`${width}px: login, readable feature scope and no horizontal overflow`, async ({
     page,
   }) => {
@@ -54,9 +54,9 @@ for (const path of [
   "/play",
   "/rooms/ABC234",
   "/matches/unknown/vote",
-  "/matches/unknown",
+  "/matches/unknown/game",
   "/matches/unknown/result",
-  "/attendance",
+  "/quests",
   "/ranking",
   "/history",
   "/customize",
