@@ -1,6 +1,6 @@
 # 초이스 아레나
 
-React + Vite + TypeScript, Firebase Google Authentication, Firestore, Cloud Functions 기반의 2~3인 선택 전략 게임입니다. 경기마다 **1,000코인**으로 시작하며 계정 포인트와 경기 코인은 분리됩니다. 베팅·결제·환전은 없습니다.
+React + Vite + TypeScript, Firebase Spark Google Authentication·Firestore·Hosting과 Cloudflare Workers Free 기반의 2~3인 선택 전략 게임입니다. Firebase Cloud Functions는 로컬 Emulator 테스트용 코드로 유지하지만 무료 운영 배포에는 사용하지 않습니다. 경기마다 **1,000코인**으로 시작하며 계정 포인트와 경기 코인은 분리됩니다. 베팅·결제·환전은 없습니다.
 
 ## 구현 상태
 
@@ -16,7 +16,7 @@ React + Vite + TypeScript, Firebase Google Authentication, Firestore, Cloud Func
 - 본인 경기 기록(최근 50개), 라운드별 선택·성공/실패·코인 변화
 - 기존 출석/꾸미기/티어/연습/가짜 미리보기 제거. `/attendance`는 `/quests`, `/customize`는 `/home`으로 이전 URL 호환만 유지
 
-**현재 공개 사이트가 이 코드로 자동 업데이트되지는 않습니다.** 이 브랜치는 배포하지 않았습니다. 새 경기·포인트·퀘스트·랭킹은 아래 Functions까지 배포해야 실제 프로젝트에서 작동합니다. Hosting만 배포하면 서버 기능을 사용할 수 없습니다.
+**현재 공개 사이트가 이 코드로 자동 업데이트되지는 않습니다.** 게임·포인트·퀘스트·랭킹을 실제로 실행하려면 Cloudflare Workers Free API를 먼저 배포하고, Firebase Hosting용 빌드에 `VITE_GAME_API_URL`을 지정해야 합니다. Firebase Functions/Blaze는 필요하지 않습니다. 기존 Firebase Functions Emulator 테스트는 유지합니다.
 
 ## GitHub 추가 작업 통합
 
@@ -82,9 +82,9 @@ Functions Emulator `5001`, Auth `9099`, Firestore `8080`을 사용합니다. Web
 ## 시간·재접속·퇴장
 
 - 모든 마감은 서버 밀리초 시간으로 저장합니다. 클라이언트 시계는 서버 시간 응답/왕복 지연으로 보정한 **표시용**이며 판정에 사용하지 않습니다.
-- 운영에서는 `scheduleDeadline` Firestore trigger가 `advanceMatch` Cloud Task를 예약합니다. 3초 공개와 다음 라운드도 이 방식입니다. 태스크 중복은 현재 서버 단계/마감으로 무해하게 처리됩니다.
-- `sweepMatches`는 매분 만료 문서 최대 100개를 보완 처리합니다. 정상 진행은 태스크가 담당합니다. 태스크/서버 장애나 네트워크 지연 시 공개가 늦어질 수 있으며 3초 전에 공개되지는 않습니다. Functions 지연을 없애려면 비용이 발생할 수 있는 최소 인스턴스 등을 운영자가 별도 검토해야 합니다.
-- Emulator에는 Cloud Tasks의 예약 실행이 없습니다. 경기 화면이 3초 간격으로 호출하는 `sync`가 **동일한 서버 판정 트랜잭션**을 실행합니다. 테스트에서 서버 시계를 주입하는 것은 테스트 생성자에만 있으며 배포 API에 시간/확률/코인 지정 기능은 없습니다.
+- **무료 운영에서는** 로그인된 경기 화면이 3초마다 Cloudflare Worker API로 `sync`를 보내 마감된 단계를 진행합니다. 여러 참가자가 동시에 호출해도 Firestore REST 트랜잭션에서 중복 정산되지 않습니다.
+- Cloudflare Workers Free의 매분 Cron Trigger가 모든 참가자가 오프라인인 경기 중 만료된 경기를 최대 5개씩 처리합니다. 모든 이용자가 나가면 3초/8초 단계도 Cron 간격 때문에 **최대 1분 이상 지연될 수 있습니다.** 무료 Worker 할당량 및 서비스 지연에 따라 추가 지연도 있을 수 있습니다.
+- Emulator에서는 기존 Firebase Functions 서버와 동일한 게임 엔진을 사용합니다. 무료 운영 Worker는 Firebase ID 토큰 서명을 Google 공개키로 검증하고 Firebase Firestore REST 트랜잭션을 실행합니다. 결과 확률과 포인트는 클라이언트가 지정할 수 없습니다.
 - 페이지 이동·새로고침·로그아웃은 퇴장이 아닙니다. `sessions → rooms.matchId → matches`를 복원하며 서버 단계와 다른 URL은 현재 단계로 이동합니다. 홈에 경기 계속하기가 표시됩니다.
 - 일시 단절은 탈락시키지 않습니다. 오래 복귀하지 않아도 제한 시간마다 무료 선택을 자동 적용하고 최대 라운드에서 마칩니다. 정확한 온라인 여부는 표시하지 않습니다. Realtime Database를 활성화하지 않았습니다.
 - 경기 중 명시적 퇴장은 확인 후 중도 포기, 코인 0, 이후 관전만 허용합니다. 투표 중 퇴장은 취소입니다. 완료 후 퇴장은 보상에 영향을 주지 않습니다. 마지막 사람이 나가면 방과 코드를 지웁니다.
@@ -127,36 +127,82 @@ npm run test:game
 
 로컬 TypeScript/빌드/단위/UI 테스트는 실행했습니다. 이 개발 환경에서는 `storage.googleapis.com` 다운로드가 차단되어 로컬 Emulator가 시작되지 않았습니다. 따라서 Emulator 실행 결과는 PR의 **Verify CI 실제 결과**를 기준으로 확인하세요. 실제 Google OAuth 팝업과 운영 Firebase 프로젝트는 직접 검증하지 않았습니다. Auth Emulator Google provider 테스트는 운영 OAuth 검증을 대신하지 않습니다.
 
-## Firebase Console에서 남은 설정 / 배포
+## 결제 계정 없이 무료로 배포하기 (Firebase Spark + Cloudflare Workers Free)
 
-이미 만든 **choice-arena** 프로젝트를 그대로 사용합니다. 프로젝트를 새로 만들 필요가 없습니다.
+Firebase **Spark 무료 요금제**를 그대로 사용합니다. 이미 사용 중인 `choice-arena` Firebase 프로젝트와 Google 로그인을 그대로 유지하고 **Cloud Functions v2/Cloud Tasks/Cloud Scheduler는 배포하지 않습니다.** 게임 서버 역할만 Cloudflare Workers Free로 옮깁니다. 이 방식은 요금제 전환이나 Firebase 결제 계정 없이 시작할 수 있지만, 각 서비스의 무료 사용량 제한이 있습니다.
 
-1. Authentication의 Google 제공자 및 Hosting 도메인/localhost 허용을 확인합니다. 기존 설정이 되어 있으면 변경할 필요가 없습니다.
-2. Firestore `(default)` 데이터베이스를 유지하고 아래 새 규칙/인덱스를 배포합니다.
-3. **새 경기 기능은 Cloud Functions v2 배포가 필요하고 Blaze 요금제/결제 계정이 필요합니다.** Cloud Run, Cloud Build, Artifact Registry, Eventarc, Cloud Tasks, Cloud Scheduler 관련 사용료가 발생할 수 있습니다. 예산 알림/할당량을 검토하고 사용자가 직접 전환 여부를 결정해야 합니다. 이 작업은 결제 연결·요금제 변경·실제 배포를 수행하지 않았습니다.
-4. Functions 리전은 `asia-northeast3`입니다. CLI 배포 계정에 필요한 배포 권한을 부여합니다. 실제 Firebase 데이터 리전에 맞춰 바꿀 경우 클라이언트 `src/lib/firebase.ts`와 `functions/src/index.ts`를 함께 수정하세요.
-5. `scheduleDeadline`의 실행 서비스 계정에 `roles/cloudtasks.enqueuer`, 필요 시 태스크 실행 계정에 대한 `roles/iam.serviceAccountUser`를 설정하고, 태스크 실행 계정에 `advanceMatch` Cloud Run 서비스의 `roles/run.invoker`를 허용합니다. `advanceMatch`를 일반 사용자에게 공개하는 IAM 설정은 하지 마세요. 환경별 기본 계정은 Console의 Functions 실행 계정/Cloud Tasks 큐에서 확인합니다. `arenaAction`은 웹 callable이므로 Firebase 인증 토큰으로 사용자 권한을 검사합니다.
-6. Firebase CLI가 필요한 API/큐/Scheduler를 생성할 수 있는 권한으로 Functions를 배포합니다. 그 후 비로그인 요청 거부, 실제 Google 로그인, 두 계정 경기, 모든 브라우저를 닫아도 마감 태스크가 진행되는지 Console 로그에서 확인합니다. Emulator는 운영 IAM·예약 전달 자체를 검증하지 않습니다.
+- **Firebase Spark**: Google 로그인, Firestore, Hosting. Firestore는 하루 50,000 읽기 / 20,000 쓰기 무료 한도이며 한도를 넘으면 기능이 제한됩니다. Hosting도 저장 및 전송 한도를 지켜야 합니다.
+- **Cloudflare Workers Free**: 하루 100,000 API 요청, 요청당 10ms CPU, Cron Trigger 최대 5개. 클라이언트는 현재 경기 중 3초마다 sync를 호출하므로 소수의 테스터로 시작하세요. 10ms CPU/50회 subrequest 한도는 실제 운영 환경에서 검증해야 합니다.
+- Firebase Google 로그인은 현행 구조를 바꾸지 않습니다. Cloudflare에서는 Firebase ID 토큰의 Google 서명을 검증하고 서비스 계정으로 Firestore에 안전하게 읽고 씁니다.
+- 서버 판정은 기존 `functions/src/engine.ts`, `functions/src/service.ts`와 동일한 코드를 사용합니다. Cloudflare Wrangler 모듈 alias가 Firebase Admin DB 클라이언트 부분만 Firestore REST 어댑터로 변경합니다.
 
-**배포를 결정한 후에만**, 프로젝트 파일(`firebase.json`, `package.json`)이 있는 폴더의 터미널에서:
+### 1. Cloudflare 무료 계정과 Firebase 서비스 계정 준비
+
+1. [Cloudflare Dashboard](https://dash.cloudflare.com/)에서 **Workers Free** 계정을 만듭니다. 유료 플랜 선택이나 결제 계정 등록은 필요 없습니다.
+2. 기존 [Firebase Console](https://console.firebase.google.com/)의 `choice-arena` 프로젝트 설정 → 서비스 계정에서 Firebase Admin SDK의 **새 비공개 키 생성**을 진행합니다. 이 파일은 절대 GitHub, 클라이언트, VITE_ 환경 변수, 채팅에 업로드하지 마세요. 가능한 최소 권한의 계정을 사용하세요. 플랫폼 정책상 키 생성이 막혀 있다면 관리자가 설정해야 합니다.
+3. 서비스 계정 JSON의 `project_id`가 `choice-arena`인지 확인합니다.
+4. Cloudflare에 로그인한 로컬 터미널에서 저장소 루트 기준 명령을 실행합니다.
+
+```sh
+npx --yes wrangler@4.129.1 login
+npx --yes wrangler@4.129.1 secret put FIREBASE_SERVICE_ACCOUNT_JSON
+```
+
+두 번째 명령의 입력창에는 **로컬에 저장한 서비스 계정 JSON 전체 내용**을 입력합니다. 일부 셸에서는 JSON 파일의 줄바꿈을 비밀값 입력으로 전달하기 어려우므로, 로컬 파일의 내용을 한 줄 JSON으로 변환해 붙여 넣거나 Wrangler의 표준입력 기능을 확인하여 사용하세요. 비밀값은 Cloudflare Worker Secret에만 저장해야 합니다.
+
+### 2. 무료 Worker API 배포
+
+```sh
+npx --yes wrangler@4.129.1 deploy
+```
+
+배포 후 출력되는 `https://choice-arena-game.<subdomain>.workers.dev` URL을 기록합니다. 먼저 `/health`에 접속하여 `{"ok":true}`가 표시되는지 확인합니다. `wrangler.jsonc`의 `ALLOWED_ORIGINS`에 Hosting 도메인이 포함되어야 합니다.
+
+**주의:** Cloudflare Workers는 무료지만, GitHub에 코드가 올라갔다고 자동 배포되지는 않습니다. Cloudflare 계정 로그인이 필요합니다.
+
+### 3. 무료 Firebase Hosting 배포
+
+저장소 루트의 `.env.example`을 `.env.local`로 복사하고 다음 값을 설정합니다.
+
+```env
+VITE_USE_EMULATORS=false
+VITE_GAME_API_URL=https://choice-arena-game.<subdomain>.workers.dev
+```
+
+`<subdomain>`을 실제 Wrangler 출력값으로 바꾸세요. **VITE_GAME_API_URL은 공개 API 주소이지 비밀 키가 아닙니다.**
 
 ```sh
 npm ci
 npm ci --prefix functions
+npm run rules:check
 npm run build
 npx firebase login
 npx firebase deploy --only firestore:rules,firestore:indexes --project choice-arena
-npx firebase deploy --only functions --project choice-arena
 npx firebase deploy --only hosting --project choice-arena
 ```
 
-Hosting 주소: https://choice-arena.web.app
+**절대** `npx firebase deploy --only functions` 또는 전체 서비스 무조건 배포 명령을 실행하지 마세요. Firebase Spark에서는 Cloud Functions 배포가 허용되지 않고 Blaze가 요구됩니다. 프런트엔드는 유효한 `VITE_GAME_API_URL`이 없으면 게임 서버 요청을 실패 처리하며, 유료 Functions로 자동 전환하지 않습니다.
 
-Hosting의 SPA rewrite는 모든 앱 경로를 `/index.html`로 연결해 경로 새로고침 404를 방지합니다. **먼저 Functions/규칙을 배포·확인한 다음 Hosting을 배포하세요.** 기존 profiles에 아바타/익명 필드가 없어도 기본값으로 읽습니다. accounts가 없는 기존 계정은 홈의 인증된 서버 호출로 0포인트 계정을 한 번 만듭니다. 기존 포인트나 전적을 클라이언트에서 임의 이관하지 않습니다.
+완료 후 접속: **https://choice-arena.web.app**
+
+### 4. 실제 출시 검증 (필수)
+
+- 실제 Google 계정 두 개로 로그인하여 2인방 생성, 준비, 시작, 모드 투표, 선택/결과, 우승 포인트, 일일 퀘스트, 랭킹까지 전체 진행합니다.
+- 3인방 인원 제한과 중도 포기, 재대결, 모바일 화면을 검증합니다.
+- 모든 브라우저를 닫고 무료 Cron Trigger가 남은 경기를 진행시키는지 Worker 로그와 Firestore 상태에서 확인합니다. 클라이언트가 없는 경기는 분 단위 지연이 있을 수 있습니다.
+- Firestore 규칙이 게임/포인트 임의 쓰기를 거부하는지, Worker가 비로그인 요청을 거부하는지 확인합니다.
+- Cloudflare Workers 및 Firebase의 무료 한도와 사용량 알림을 수시로 점검합니다. **서비스 규모가 커지면 무료 사용량을 초과해 기능이 중단될 수 있습니다.**
+- 배포 후 닉네임은 가입 후 1회만 변경 가능한지 검증합니다. 기존 계정도 한 번의 변경 기회가 있습니다.
+
+### 테스트와 한계
+
+로컬에서는 계속 `VITE_USE_EMULATORS=true`로 원래 Firebase Functions Emulator 테스트를 실행할 수 있습니다. CI에서는 Wrangler 번들 검사를 포함합니다. **실제 Cloudflare Worker에서 Firebase 인증, Firestore REST 트랜잭션, Cron, 무료 플랜 CPU 한도가 통과하는지 운영 검증은 아직 완료되지 않았습니다.** 이 저장소에 Cloudflare 서비스 계정 비밀키나 유료 설정은 포함되지 않습니다.
+
+실사용 규모가 커져 Workers Free의 요청당 CPU 10ms/일일 요청 한도를 넘으면 Worker 오류가 발생할 수 있습니다. Google OAuth 검증, OAuth 서비스 계정 토큰 발급, Firestore 동시 트랜잭션을 실제 Workers 환경에서 검증해야 합니다. 온라인 참가자가 있으면 3초 sync로 진행하지만 전원이 오프라인이면 Cron이 순차 보완하므로 진행이 늦어질 수 있습니다.
 
 ## 남은 운영 제한
 
-- 실제 Google OAuth/운영 배포/IAM/Cloud Tasks 예약 전달 확인은 사용자의 프로젝트에서 필요합니다.
-- 방치 데이터 자동 정리, Realtime Database presence, 사진 업로드, 효과음은 제공하지 않습니다. 동작하는 것처럼 표시하지 않습니다.
-- 반복 상대와의 담합·다중 계정 보상 파밍 방지, App Check 강제, 서버 호출의 사용자별 rate limit, 랭킹 전체 페이지네이션은 후속 운영 과제입니다. 현재 서버는 규칙에 맞는 실제 경기 보상만 검증하며 동일 상대 반복 경기를 금지하지 않습니다.
-- 진행 중인 경기의 시나리오 데이터 변경 시 이전 버전 호환이 필요합니다. 운영 중 배포는 경기 종료 후 진행하거나 버전별 데이터 보관 전략을 먼저 추가하세요.
+- 실제 Cloudflare 배포와 Firebase Hosting/규칙 배포는 사용자의 계정 인증이 필요하며 자동 실행하지 않았습니다.
+- 방치 대기실/오래된 경기 데이터 자동 정리, 정확한 접속 상태, 사진 업로드, 효과음은 아직 제공하지 않습니다.
+- 반복 상대 담합·다중 계정 포인트 파밍 방지, App Check 강제, 사용자별 rate limit, 랭킹 전체 페이지네이션은 후속 운영 과제입니다.
+- 경기 진행 중 시나리오 데이터 업데이트 시 호환성 관리가 필요합니다. 활성 경기가 끝난 뒤 새 버전을 배포하는 것을 권장합니다.
