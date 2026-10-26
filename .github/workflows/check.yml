@@ -8,6 +8,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,7 +24,16 @@ jobs:
       - run: npm run build
       - run: npm run test:unit
       - run: npm run test:rules
-      - run: npx playwright install --with-deps chromium
+      - name: Prepare browser
+        timeout-minutes: 5
+        run: |
+          if command -v google-chrome >/dev/null 2>&1; then
+            browser_path="$(command -v google-chrome)"
+            echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE=$browser_path" >> "$GITHUB_ENV"
+            "$browser_path" --version
+          else
+            npx playwright install --with-deps chromium
+          fi
       - run: npm run test:ui
       - run: npm run test:auth
       - run: npm run test:game
