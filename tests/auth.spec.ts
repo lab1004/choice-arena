@@ -94,6 +94,10 @@ for (const width of [360, 375, 390, 768, 1440]) {
     await expect(
       page.getByRole("heading", { name: "경기에 접근할 수 없어요" }),
     ).toBeVisible();
+    await page.goto("/matches/bad%20id/game");
+    await expect(
+      page.getByRole("heading", { name: "잘못된 경기 주소입니다" }),
+    ).toBeVisible();
     await page.goto("/rooms/ZZZ999");
     await expect(
       page.getByRole("heading", { name: "참가 권한을 확인해 주세요" }),

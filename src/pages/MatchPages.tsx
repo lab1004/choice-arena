@@ -66,14 +66,13 @@ function Choice({
 export function MatchPage({ arena }: { arena: Arena }) {
   const { matchId = "" } = useParams();
   const { pathname } = useLocation();
+  const validId = /^[a-zA-Z0-9_-]{1,80}$/.test(matchId);
   const navigate = useNavigate();
   const {
     data: m,
     error,
     loaded,
-  } = useDocument<Match>(
-    /^[a-zA-Z0-9_-]{1,80}$/.test(matchId) ? `matches/${matchId}` : null,
-  );
+  } = useDocument<Match>(validId ? `matches/${matchId}` : null);
   const [now, setNow] = useState(Date.now()),
     [clockReady, setClockReady] = useState(false),
     [syncError, setSyncError] = useState(""),
@@ -126,6 +125,14 @@ export function MatchPage({ arena }: { arena: Arena }) {
       <section className="route-page">
         <h1>경기에 접근할 수 없어요</h1>
         <p role="alert">{error}</p>
+        <Link to="/home">메인 메뉴로</Link>
+      </section>
+    );
+  if (!validId)
+    return (
+      <section className="route-page">
+        <h1>잘못된 경기 주소입니다</h1>
+        <p>초대받은 경기 주소를 다시 확인해 주세요.</p>
         <Link to="/home">메인 메뉴로</Link>
       </section>
     );

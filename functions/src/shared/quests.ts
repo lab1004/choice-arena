@@ -43,7 +43,7 @@ export const QUESTS: Quest[] = [
   q("success6", "행동 6회 성공", "success", 6),
   q("recover", "실패 후 다음 선택 성공", "recover"),
   q("manual5", "직접 확정 5회", "manual", 5),
-  q("rounds10", "라운드 결과 10회 확인", "rounds", 10),
+  q("rounds10", "라운드 10회 완료", "rounds", 10),
 ];
 export interface Daily {
   day: string;
