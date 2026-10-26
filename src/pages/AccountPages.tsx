@@ -51,7 +51,14 @@ export function ProfileForm({
     ),
     [step, setStep] = useState(1),
     [saved, setSaved] = useState(false);
+  const nicknameLocked = !onboarding && arena.profile?.nicknameChangeUsed === true;
+  const nicknameChanged = !onboarding && nickname.trim() !== (arena.profile?.nickname ?? "");
   const save = async () => {
+    if (nicknameLocked && nicknameChanged) return;
+    if (
+      nicknameChanged &&
+      !window.confirm("닉네임은 가입 후 한 번만 변경할 수 있고 다시 바꿀 수 없어요. 이 닉네임으로 변경할까요?")
+    ) return;
     setSaved(false);
     await arena.saveNickname(nickname, avatar, anonymous);
     setSaved(true);
@@ -80,12 +87,20 @@ export function ProfileForm({
               value={nickname}
               maxLength={12}
               autoComplete="nickname"
+              disabled={nicknameLocked}
               onChange={(e) => {
                 setNickname(e.target.value);
                 setSaved(false);
               }}
             />
-            <p className="field-hint">한글·영문·숫자·밑줄 2~12자</p>
+            <p className="field-hint">
+              한글·영문·숫자·밑줄 2~12자.
+              {onboarding
+                ? " 가입 후 닉네임은 한 번만 변경할 수 있어요."
+                : nicknameLocked
+                  ? " 닉네임 변경 기회를 사용해 더 이상 변경할 수 없어요."
+                  : " 닉네임 변경은 한 번만 가능하며 변경 후에는 되돌릴 수 없어요."}
+            </p>
           </>
         )}
         {(!onboarding || step === 2) && (
@@ -128,7 +143,10 @@ export function ProfileForm({
         <button
           className="primary"
           disabled={
-            !!arena.busy || !arena.online || !validNickname(nickname.trim())
+            !!arena.busy ||
+            !arena.online ||
+            !validNickname(nickname.trim()) ||
+            (nicknameLocked && nicknameChanged)
           }
         >
           {onboarding
