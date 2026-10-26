@@ -100,10 +100,27 @@ export function HomeActions({ arena }: { arena: Arena }) {
               className="secondary"
               disabled={disabled || input.length !== GAME_CONFIG.roomCodeLength}
               type="submit"
+              aria-label={arena.busy === "방에 참가하는 중" ? "참가 확인 중" : "참가"}
             >
-              참가 <ChevronRight size={17} />
+              {arena.busy === "방에 참가하는 중" ? "확인 중…" : "참가"}
+              <ChevronRight size={17} />
             </button>
           </div>
+          {arena.error && (
+            <p className="notice error" role="alert">
+              참가하지 못했어요: {arena.error}
+            </p>
+          )}
+          {!arena.canMutate && !arena.busy && !arena.error && (
+            <p className="field-hint" role="status">
+              로그인 상태와 서버 연결을 확인하는 중이에요. 참가 버튼이 비활성화되어
+              있다면 인터넷 연결을 확인하고 화면을 새로고침해 주세요.
+            </p>
+          )}
+          <p className="field-hint">
+            2인·3인 게임은 각자 다른 Google 계정으로 로그인해야 해요.
+            참가가 완료되면 준비 버튼이 있는 대기실로 이동합니다.
+          </p>
         </form>
       </section>
     </div>
