@@ -4,7 +4,7 @@ React + Vite + TypeScript, Firebase Google Authentication, Firestore, Cloud Func
 
 ## 구현 상태
 
-- Google 로그인·복원, 닉네임 → 기본 아바타 선택/건너뛰기 → 가입, 설정에서 프로필·랭킹 익명 변경
+- Google 로그인·복원, 닉네임 → 기본 아바타 선택/건너뛰기 → 가입. 닉네임은 가입 후 단 1회 변경 가능하며, 이후 Firestore 규칙에서 추가 변경 차단. 기본 아바타·랭킹 익명 설정은 계속 변경 가능
 - `/login`, `/onboarding`, `/home`, `/play`, `/rooms/:roomId`, `/matches/:matchId/vote`, `/matches/:matchId/game`, `/matches/:matchId/result`, `/quests`, `/ranking`, `/history`, `/settings`
 - 1 vs 1 / 1 vs 1 vs 1, 6자리 초대 코드 충돌 재시도, 트랜잭션 참가·정원 제한, 본인 준비, 방장 위임·명시적 퇴장
 - 정원 충족 + 방장 포함 전원 준비 시 서버에서 시작. 스토리/랜덤 투표와 테마 투표, 동률 서버 추첨, 미투표 기권(전원 기권도 서버 추첨)
