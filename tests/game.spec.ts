@@ -31,9 +31,50 @@ async function create(page: Page, n: number) {
 }
 async function join(page: Page, code: string) {
   await page.getByRole("link", { name: /게임 시작/ }).click();
+  // A mobile guest needs an actionable explanation instead of a silent
+  // failure if an invalid invitation code is submitted.
+  await page.getByLabel("6자리 방 코드").fill("ABCO12");
+  await page.getByRole("button", { name: "참가", exact: true }).click();
+  await expect(page.locator(".join-panel [role=alert]")).toContainText(
+    "6자리 초대 코드",
+  );
   await page.getByLabel("6자리 방 코드").fill(code);
   await page.getByRole("button", { name: "참가", exact: true }).click();
-  await expect(page).toHaveURL(new RegExp(`/rooms/${code}$`));
+  await expect(page).toHaveURL(new RegExp(`/rooms/${code}import { test, expect, type Browser, type Page } from "@playwright/test";
+async function login(browser: Browser, width: number, name: string) {
+  const context = await browser.newContext({
+    viewport: { width, height: 850 },
+  });
+  const page = await context.newPage();
+  await page.goto("/home");
+  await expect(page).toHaveURL(/\/login$/);
+  await page.evaluate(async () => {
+    const path = "/tests/fixtures/emulator-auth.ts";
+    await (await import(/* @vite-ignore */ path)).signInForAuthTest();
+  });
+  await expect(page).toHaveURL(/\/onboarding$/);
+  await page.getByLabel("게임 닉네임", { exact: true }).fill(name);
+  await page.getByRole("button", { name: "다음: 프로필 사진" }).click();
+  await page.getByRole("button", { name: "가입 완료", exact: true }).click();
+  await expect(page).toHaveURL(/\/home$/);
+  return { context, page };
+}
+async function create(page: Page, n: number) {
+  await page.getByRole("link", { name: /게임 시작/ }).click();
+  await page
+    .getByRole("button", {
+      name: n === 2 ? "1 vs 1" : "1 vs 1 vs 1",
+      exact: true,
+    })
+    .click();
+  await page.getByRole("button", { name: "새로운 방 만들기" }).click();
+  await expect(page).toHaveURL(/\/rooms\//);
+  return new URL(page.url()).pathname.split("/").at(-1)!;
+}
+));
+  await expect(
+    page.getByRole("button", { name: "준비 완료", exact: true }),
+  ).toBeEnabled();
 }
 async function noOverflow(page: Page) {
   expect(
