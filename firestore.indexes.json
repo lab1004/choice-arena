@@ -1,6 +1,50 @@
 {
   "indexes": [],
   "fieldOverrides": [
-    { "collectionGroup": "rooms", "fieldPath": "members", "indexes": [] }
+    {
+      "collectionGroup": "rooms",
+      "fieldPath": "members",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "matches",
+      "fieldPath": "players",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "matches",
+      "fieldPath": "results",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "matches",
+      "fieldPath": "scenario",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "matches",
+      "fieldPath": "awards",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "matchSecrets",
+      "fieldPath": "choices",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "matchSecrets",
+      "fieldPath": "votes",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "matchSecrets",
+      "fieldPath": "deck",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "history",
+      "fieldPath": "rounds",
+      "indexes": []
+    }
   ]
 }

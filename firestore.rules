@@ -30,7 +30,7 @@ service cloud.firestore {
     function roomValid(room) {
       return room.keys().hasAll(['hostId','maxPlayers','status','memberIds','members','createdAt','updatedAt'])
         && room.keys().hasOnly(['hostId','maxPlayers','status','memberIds','members','createdAt','updatedAt'])
-        && room.maxPlayers == capacityLimit() && room.status == 'waiting'
+        && room.maxPlayers in [2, capacityLimit()] && room.status == 'waiting'
         && room.memberIds is list && room.memberIds.size() > 0 && room.memberIds.size() <= room.maxPlayers
         && room.memberIds.toSet().size() == room.memberIds.size()
         && room.members is map && room.members.keys().toSet() == room.memberIds.toSet()
@@ -40,12 +40,25 @@ service cloud.firestore {
       allow get: if signedIn();
       allow create, update: if own(uid)
         && request.resource.data.keys().hasAll(['nickname','createdAt','updatedAt'])
-        && request.resource.data.keys().hasOnly(['nickname','createdAt','updatedAt'])
+        && request.resource.data.keys().hasOnly(['nickname','nicknameChangeUsed','avatarId','rankingAnonymous','createdAt','updatedAt'])
+        && request.resource.data.get('nicknameChangeUsed', false) is bool
+        && request.resource.data.get('avatarId', 'sprout') in ['sprout','moon','comet','wave','sun','leaf']
+        && request.resource.data.get('rankingAnonymous', false) is bool
         && request.resource.data.nickname is string
         && request.resource.data.nickname.matches('^[가-힣a-zA-Z0-9_]{2,12}$')
         && request.resource.data.updatedAt == request.time
-        && ((!exists(/databases/$(database)/documents/profiles/$(uid)) && request.resource.data.createdAt == request.time)
-          || (exists(/databases/$(database)/documents/profiles/$(uid)) && request.resource.data.createdAt == resource.data.createdAt));
+        && ((!exists(/databases/$(database)/documents/profiles/$(uid))
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.get('nicknameChangeUsed', false) == false)
+          || (exists(/databases/$(database)/documents/profiles/$(uid))
+            && request.resource.data.createdAt == resource.data.createdAt
+            && (
+              (request.resource.data.nickname == resource.data.nickname
+                && request.resource.data.get('nicknameChangeUsed', false) == resource.data.get('nicknameChangeUsed', false))
+              || (request.resource.data.nickname != resource.data.nickname
+                && resource.data.get('nicknameChangeUsed', false) == false
+                && request.resource.data.get('nicknameChangeUsed', false) == true)
+            )));
     }
     match /privateProfiles/{uid} {
       allow get: if own(uid);
@@ -73,7 +86,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['playerCount','maxPlayers'])
         && request.resource.data.keys().hasOnly(['playerCount','maxPlayers'])
         && request.resource.data.playerCount is int
-        && request.resource.data.maxPlayers == capacityLimit()
+        && request.resource.data.maxPlayers in [2, capacityLimit()]
         && request.resource.data.playerCount > 0 && request.resource.data.playerCount <= request.resource.data.maxPlayers
         && request.resource.data.playerCount == getAfter(roomPath(code)).data.memberIds.size()
         && (request.auth.uid in getAfter(roomPath(code)).data.memberIds
@@ -120,12 +133,21 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hostId','updatedAt']);
       }
       allow update: if signedIn() && roomValid(request.resource.data)
+        && resource.data.status == 'waiting'
         && directoryMatches(code, request.resource.data)
         && (joined() || left() || readinessChanged() || hostTransferred());
-      allow delete: if signedIn() && resource.data.memberIds == [request.auth.uid]
+      allow delete: if signedIn() && resource.data.status == 'waiting' && resource.data.memberIds == [request.auth.uid]
         && sessionAfter(null) && !existsAfter(directoryPath(code));
     }
-    // Future match results, attendance and ranking are server-owned. No client writes.
+    match /accounts/{uid} {
+      allow get: if own(uid);
+      match /days/{day} { allow get: if own(uid); }
+      match /history/{id} { allow read: if own(uid); }
+    }
+    match /matches/{id} {
+      allow get: if signedIn() && request.auth.uid in resource.data.memberIds;
+    }
+    // matchSecrets, choices, ledger and all authoritative writes are server-only.
     match /{document=**} { allow read, write: if false; }
   }
 }

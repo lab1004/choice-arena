@@ -84,6 +84,47 @@ describe("profiles and default denial", () => {
       ),
     );
   });
+  it("allows exactly one post-onboarding nickname change and permanently locks later changes", async () => {
+    const db = await player("alice");
+    const ref = doc(db, "profiles", "alice");
+    await saveProfile(db, "alice", "선택_alice", "alice@example.com", "moon", true);
+    expect((await getDoc(ref)).data()?.nicknameChangeUsed).toBe(false);
+    await assertFails(
+      updateDoc(ref, {
+        nickname: "탈취시도",
+        nicknameChangeUsed: false,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await saveProfile(db, "alice", "변경완료", "alice@example.com", "moon", true);
+    expect((await getDoc(ref)).data()).toMatchObject({
+      nickname: "변경완료",
+      nicknameChangeUsed: true,
+    });
+    await expect(
+      saveProfile(db, "alice", "두번째변경", "alice@example.com"),
+    ).rejects.toMatchObject({ code: "nickname-locked" });
+    await assertFails(
+      updateDoc(ref, {
+        nickname: "또바꾸기",
+        nicknameChangeUsed: true,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await assertFails(
+      updateDoc(ref, {
+        nicknameChangeUsed: false,
+        updatedAt: serverTimestamp(),
+      }),
+    );
+    await saveProfile(db, "alice", "변경완료", "alice@example.com", "sun", false);
+    expect((await getDoc(ref)).data()).toMatchObject({
+      nickname: "변경완료",
+      nicknameChangeUsed: true,
+      avatarId: "sun",
+      rankingAnonymous: false,
+    });
+  });
   it("rejects reward/rank injection, invalid nickname, arbitrary email and unknown paths", async () => {
     const db = await player("alice");
     await assertFails(

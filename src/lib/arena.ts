@@ -73,14 +73,23 @@ export async function saveProfile(
   uid: string,
   nickname: string,
   email: string | null,
+  avatarId = "sprout",
+  rankingAnonymous = false,
 ) {
   nickname = nickname.trim();
   if (!validNickname(nickname)) throw new ArenaError("invalid-nickname");
   await runTransaction(db, async (tx) => {
     const ref = doc(db, "profiles", uid);
     const existing = await tx.get(ref);
+    const prior = existing.data();
+    const changingNickname = !!prior && prior.nickname !== nickname;
+    if (changingNickname && prior?.nicknameChangeUsed)
+      throw new ArenaError("nickname-locked");
     tx.set(ref, {
       nickname,
+      nicknameChangeUsed: changingNickname || (prior?.nicknameChangeUsed ?? false),
+      avatarId,
+      rankingAnonymous,
       createdAt: existing.data()?.createdAt ?? serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -91,7 +100,10 @@ export async function createRoom(
   db: Firestore,
   uid: string,
   nextCode = generateCode,
+  maxPlayers: number = GAME_CONFIG.maxPlayers,
 ): Promise<string> {
+  if (![2, GAME_CONFIG.maxPlayers].includes(maxPlayers))
+    throw new ArenaError("invalid-capacity");
   for (let attempt = 0; attempt < 8; attempt++) {
     const code = nextCode();
     const result = await membershipTransaction(db, async (tx, observe) => {
@@ -108,7 +120,7 @@ export async function createRoom(
       if (existing.exists()) return false;
       tx.set(doc(db, "rooms", code), {
         hostId: uid,
-        maxPlayers: GAME_CONFIG.maxPlayers,
+        maxPlayers,
         status: "waiting",
         memberIds: [uid],
         members: {
@@ -120,7 +132,7 @@ export async function createRoom(
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      tx.set(directory, { playerCount: 1, maxPlayers: GAME_CONFIG.maxPlayers });
+      tx.set(directory, { playerCount: 1, maxPlayers });
       tx.set(session, { roomCode: code });
       return true;
     });
