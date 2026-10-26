@@ -126,7 +126,9 @@ function parseStream(body: string): Json[] {
 export class FirestoreREST {
   readonly root: string;
   constructor(readonly env: WorkerEnv) {
-    this.root = "https://firestore.googleapis.com/v1/projects/" +
+    // Firestore document.name is a resource name, NOT an HTTPS URL.
+    // The REST endpoint URL is constructed only when sending a request.
+    this.root = "projects/" +
       encodeURIComponent(env.FIREBASE_PROJECT_ID) + "/databases/(default)/documents";
   }
   doc(path: string): Doc {
@@ -140,7 +142,7 @@ export class FirestoreREST {
     return new Query(this, path);
   }
   async request(path: string, body: Json): Promise<Json[]> {
-    const res = await fetch(this.root + path, {
+    const res = await fetch("https://firestore.googleapis.com/v1/" + this.root + path, {
       method: "POST",
       headers: { Authorization: "Bearer " + await accessToken(this.env), "Content-Type": "application/json" },
       body: JSON.stringify(body),
