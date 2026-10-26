@@ -8,7 +8,7 @@ import {
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 const env = import.meta.env;
 export const usingEmulators = env.DEV && env.VITE_USE_EMULATORS === "true";
-const app = initializeApp({
+export const firebaseApp = initializeApp({
   apiKey:
     env.VITE_FIREBASE_API_KEY || "AIzaSyAo15UBS5RcqJu4rsz7rRpgk7PDoMRita8",
   authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "choice-arena.firebaseapp.com",
@@ -21,8 +21,8 @@ const app = initializeApp({
   appId:
     env.VITE_FIREBASE_APP_ID || "1:1035613270412:web:6f64fc87258c626fc5a6a9",
 });
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+export const auth = getAuth(firebaseApp);
+export const db = getFirestore(firebaseApp);
 if (usingEmulators) {
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
   connectFirestoreEmulator(db, "127.0.0.1", 8080);

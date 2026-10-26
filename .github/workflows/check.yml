@@ -19,5 +19,11 @@ jobs:
           distribution: temurin
           java-version: 21
       - run: npm ci
+      - run: npm --prefix functions ci
+      - run: npm run test:content
       - run: npm run build
       - run: npm run test:rules
+      - run: npm run test:server
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui
+      - run: npm run test:auth

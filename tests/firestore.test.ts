@@ -388,3 +388,58 @@ describe("hostile clients cannot bypass UI checks", () => {
     await assertFails(batch.commit());
   });
 });
+
+describe("server-owned match, rewards and private choices", () => {
+  it("participants read public state, but no client can read a hidden choice or forge points", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      const admin = context.firestore() as unknown as Firestore;
+      await setDoc(doc(admin, "matches", "game1"), {
+        participants: ["alice", "bob"],
+        phase: "playing",
+      });
+      await setDoc(doc(admin, "matches/game1/choices/1-alice"), {
+        choiceId: "a",
+      });
+      await setDoc(doc(admin, "playerStats/alice"), { points: 10 });
+      await setDoc(doc(admin, "histories/alice/matches/game1"), { points: 10 });
+      await setDoc(doc(admin, "settings/alice"), { anonymous: true });
+    });
+    const alice = dbFor("alice"),
+      bob = dbFor("bob"),
+      outsider = dbFor("outsider");
+    await assertSucceeds(getDoc(doc(alice, "matches/game1")));
+    await assertFails(getDoc(doc(outsider, "matches/game1")));
+    await assertFails(getDoc(doc(alice, "matches/game1/choices/1-alice")));
+    await assertFails(getDoc(doc(bob, "matches/game1/choices/1-alice")));
+    await assertFails(
+      updateDoc(doc(alice, "matches/game1"), { phase: "finished" }),
+    );
+    await assertSucceeds(getDoc(doc(alice, "playerStats/alice")));
+    await assertFails(getDoc(doc(bob, "playerStats/alice")));
+    await assertFails(
+      updateDoc(doc(alice, "playerStats/alice"), { points: 9999 }),
+    );
+    await assertSucceeds(getDoc(doc(alice, "settings/alice")));
+    await assertFails(getDoc(doc(bob, "settings/alice")));
+    await assertSucceeds(getDocs(collection(alice, "histories/alice/matches")));
+    await assertFails(getDocs(collection(bob, "histories/alice/matches")));
+    await assertFails(
+      setDoc(doc(alice, "dailyQuests/alice/days/2026-10-26"), {
+        claimed: true,
+      }),
+    );
+  });
+  it("a duel is limited to two participants", async () => {
+    const host = await player("host"),
+      guest = await player("guest"),
+      extra = await player("extra");
+    await createRoom(host, "host", () => code, 2);
+    await joinRoom(guest, "guest", code);
+    await expect(joinRoom(extra, "extra", code)).rejects.toMatchObject({
+      code: "room-full",
+    });
+    expect(
+      (await getDoc(doc(host, "rooms", code))).data()?.memberIds.length,
+    ).toBe(2);
+  });
+});
