@@ -50,15 +50,16 @@ export class GameService {
   }
   async start(uid: string, code: string) {
     const id = this.db.collection("matches").doc().id;
-    await this.db.runTransaction(async (tx) => {
+    return this.db.runTransaction(async (tx) => {
       const ref = this.db.doc(`rooms/${code}`),
         snap = await tx.get(ref);
       const r = snap.data();
       requireThat(r && r.hostId === uid, "방장만 시작할 수 있습니다.");
-      if (r!.status === "playing" && r!.matchId) return;
+      if (r!.status === "playing" && r!.matchId) return r!.matchId as string;
       requireThat(r!.status === "waiting", "대기실 상태를 확인해 주세요.");
       requireThat(
-        [2, 3].includes(r!.maxPlayers) && r!.memberIds.length === r!.maxPlayers,
+        [2, CONFIG.maxPlayers].includes(r!.maxPlayers) &&
+          r!.memberIds.length === r!.maxPlayers,
         "선택한 인원이 모두 입장해야 합니다.",
       );
       requireThat(
@@ -100,9 +101,8 @@ export class GameService {
         matchId: id,
         updatedAt: FieldValue.serverTimestamp(),
       });
+      return id;
     });
-    // Return the committed id, including a duplicate start request's existing match.
-    return (await this.db.doc(`rooms/${code}`).get()).data()!.matchId as string;
   }
   async act(
     uid: string | null,

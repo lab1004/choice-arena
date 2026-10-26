@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, afterAll, it, expect } from "vitest";
-import { initializeApp, deleteApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { createAdminFixture } from "../functions/test/admin-fixture";
+
 import {
   initializeTestEnvironment,
   assertFails,
@@ -23,8 +23,8 @@ import { createRoom, joinRoom, saveProfile, setReady } from "../src/lib/arena";
 import type { Match, Secret } from "../functions/src/shared/model";
 import { koreaDay } from "../functions/src/shared/quests";
 process.env.FIRESTORE_EMULATOR_HOST = "127.0.0.1:8080";
-const app = initializeApp({ projectId: "demo-choice-arena" }, "service-tests");
-const db = getFirestore(app);
+const fixture = createAdminFixture();
+const db = fixture.db;
 let now = Date.parse("2026-10-25T14:00:00Z");
 const service = new GameService(
   db,
@@ -78,8 +78,7 @@ beforeEach(async () => {
 });
 afterAll(async () => {
   await env.cleanup();
-  await db.terminate();
-  await deleteApp(app);
+  await fixture.dispose();
 });
 it.each([2, 3])(
   "enforces exact capacity %i and concurrent joins never overflow",
@@ -299,14 +298,12 @@ it("server settlement updates quests from real match records, and forfeit state 
   for (const uid of ["a", "b", "c"])
     await service.act(uid, id, { kind: "vote", value: "random" });
   const day = koreaDay(now);
-  await db
-    .doc(`accounts/b/days/${day}`)
-    .set({
-      day,
-      ids: ["complete1", "free3", "random", "survive"],
-      progress: {},
-      claimed: [],
-    });
+  await db.doc(`accounts/b/days/${day}`).set({
+    day,
+    ids: ["complete1", "free3", "random", "survive"],
+    progress: {},
+    claimed: [],
+  });
   await service.exit("a", id);
   expect((await state(id)).players.a.forfeited).toBe(true);
   await service.act("b", id, { kind: "tick" });
@@ -335,4 +332,24 @@ it("persisted countdown resumes after disconnection with unchanged hidden choice
   await fresh.act(null, id, { kind: "tick" });
   expect((await state(id)).results).toHaveLength(1);
   expect((await state(id)).players.a.alive).toBe(true);
+});
+it("ignores a previous phase deadline even if delivered during a later overdue phase", async () => {
+  const id = await start();
+  const initial = await state(id);
+  now = initial.deadline;
+  await service.act(null, id, { kind: "tick" }, initial.deadline);
+  const next = await state(id);
+  expect(next.stage).toBe("themeVote");
+  now = next.deadline;
+  await service.act(null, id, { kind: "tick" }, initial.deadline);
+  expect((await state(id)).stage).toBe("themeVote");
+  await service.act(null, id, { kind: "tick" }, next.deadline);
+  expect((await state(id)).stage).toBe("choosing");
+});
+it("same uid/date has deterministic distinct quests after a restore", async () => {
+  await room();
+  const a = await service.daily("a");
+  await db.doc(`accounts/a/days/${a.day}`).delete();
+  expect(await service.daily("a")).toEqual(a);
+  expect(new Set(a.ids).size).toBe(4);
 });

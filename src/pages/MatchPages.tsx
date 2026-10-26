@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import {
   THEMES,
+  SCENARIOS,
   matchPath,
   type Match,
   type ScenarioChoice,
@@ -306,7 +307,11 @@ export function MatchPage({ arena }: { arena: Arena }) {
             <article key={id}>
               <h3>{m.players[id].nickname}</h3>
               <p>
-                {m.scenario?.choices.find((c) => c.id === o.choiceId)?.title}
+                {
+                  SCENARIOS.find(
+                    (s) => s.id === m.results.at(-1)!.scenarioId,
+                  )?.choices.find((c) => c.id === o.choiceId)?.title
+                }
                 {o.timedOut ? " · 시간 초과 자동 선택" : ""}
               </p>
               <strong

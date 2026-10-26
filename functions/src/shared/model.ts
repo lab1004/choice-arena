@@ -1,3 +1,4 @@
+import gameConfig from "./config.json";
 import raw from "./stories.json";
 export interface ScenarioChoice {
   id: string;
@@ -27,7 +28,8 @@ export interface Theme {
 export const THEMES = raw as Theme[];
 export const SCENARIOS = THEMES.flatMap((t) => t.scenarios);
 export const CONFIG = {
-  startingCoins: 1000,
+  startingCoins: gameConfig.startingCoins,
+  maxPlayers: gameConfig.maxPlayers,
   choiceMs: 30_000,
   countdownMs: 3_000,
   resultMs: 8_000,

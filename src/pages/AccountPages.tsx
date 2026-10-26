@@ -174,6 +174,7 @@ export function Points({ arena }: { arena: Arena }) {
     if (
       uid &&
       arena.profile &&
+      !arena.busy &&
       account.loaded &&
       !account.data &&
       attempted.current !== uid
@@ -181,7 +182,14 @@ export function Points({ arena }: { arena: Arena }) {
       attempted.current = uid;
       void arena.run("계정 연결 중", () => callGame("ensureAccount"));
     }
-  }, [arena.user, arena.profile, account.loaded, account.data, arena.run]);
+  }, [
+    arena.user,
+    arena.profile,
+    arena.busy,
+    account.loaded,
+    account.data,
+    arena.run,
+  ]);
   return (
     <>
       <dl className="profile-stats">
