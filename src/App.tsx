@@ -32,7 +32,7 @@ const menu = [
   ["/quests", "일일 퀘스트", "매일 네 가지 도전과 작은 보상"],
   ["/ranking", "랭킹", "선택으로 쌓아갈 순위"],
   ["/history", "내 기록", "경기와 선택 돌아보기"],
-  ["/settings", "설정", "닉네임·프로필 사진·익명 설정"],
+  ["/settings", "설정", "닉네임 1회 변경·프로필 사진·익명 설정"],
 ];
 function Page({ title, children }: { title: string; children: ReactNode }) {
   return (
