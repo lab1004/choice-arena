@@ -3,6 +3,8 @@ import type { Timestamp } from "firebase/firestore";
 export const GAME_CONFIG = config;
 export interface Profile {
   nickname: string;
+  /** True after the one allowed nickname change following onboarding. */
+  nicknameChangeUsed?: boolean;
   avatarId?: string;
   rankingAnonymous?: boolean;
   createdAt: Timestamp;
