@@ -49,7 +49,7 @@ export default {
     const origin = allowedOrigin(request, env);
     if (request.headers.has("Origin") && !origin)
       return response({ error: "허용되지 않은 웹사이트입니다." }, 403, null);
-    if (request.method === "OPTIONS") return response({}, 204, origin);
+    if (request.method === "OPTIONS") return response({}, 200, origin);
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/health")
       return response({ ok: true, provider: "cloudflare-workers-free" }, 200, origin);
