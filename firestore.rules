@@ -30,7 +30,7 @@ service cloud.firestore {
     function roomValid(room) {
       return room.keys().hasAll(['hostId','maxPlayers','status','memberIds','members','createdAt','updatedAt'])
         && room.keys().hasOnly(['hostId','maxPlayers','status','memberIds','members','createdAt','updatedAt'])
-        && room.maxPlayers == capacityLimit() && room.status == 'waiting'
+        && room.maxPlayers in [2, capacityLimit()] && room.status == 'waiting'
         && room.memberIds is list && room.memberIds.size() > 0 && room.memberIds.size() <= room.maxPlayers
         && room.memberIds.toSet().size() == room.memberIds.size()
         && room.members is map && room.members.keys().toSet() == room.memberIds.toSet()
@@ -73,7 +73,7 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['playerCount','maxPlayers'])
         && request.resource.data.keys().hasOnly(['playerCount','maxPlayers'])
         && request.resource.data.playerCount is int
-        && request.resource.data.maxPlayers == capacityLimit()
+        && request.resource.data.maxPlayers in [2, capacityLimit()]
         && request.resource.data.playerCount > 0 && request.resource.data.playerCount <= request.resource.data.maxPlayers
         && request.resource.data.playerCount == getAfter(roomPath(code)).data.memberIds.size()
         && (request.auth.uid in getAfter(roomPath(code)).data.memberIds
@@ -91,7 +91,7 @@ service cloud.firestore {
         let before = resource.data;
         let after = request.resource.data;
         let uid = request.auth.uid;
-        return !(uid in before.memberIds) && freeBefore() && sessionAfter(code)
+        return before.status == 'waiting' && !(uid in before.memberIds) && freeBefore() && sessionAfter(code)
           && after.diff(before).affectedKeys().hasOnly(['memberIds','members','updatedAt'])
           && after.memberIds == before.memberIds.concat([uid])
           && after.members.diff(before.members).affectedKeys().hasOnly([uid]) && joiningMember(after);
@@ -125,7 +125,30 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.memberIds == [request.auth.uid]
         && sessionAfter(null) && !existsAfter(directoryPath(code));
     }
-    // Future match results, attendance and ranking are server-owned. No client writes.
+    // Match state is written only by trusted Cloud Functions. Participants can
+    // observe the public match document; private choice documents stay hidden.
+    match /matches/{matchId} {
+      allow get: if signedIn() && request.auth.uid in resource.data.participants;
+      allow list, create, update, delete: if false;
+      match /choices/{uid} { allow read, write: if false; }
+    }
+    match /playerStats/{uid} {
+      allow get: if own(uid);
+      allow list, write: if false;
+    }
+    match /settings/{uid} {
+      allow get: if own(uid);
+      allow list, write: if false;
+    }
+    match /histories/{uid}/matches/{matchId} {
+      allow get, list: if own(uid);
+      allow write: if false;
+    }
+    match /dailyQuests/{uid}/days/{day} {
+      allow get: if own(uid);
+      allow list, write: if false;
+    }
+    // Points, results, quests and rankings are server-owned.
     match /{document=**} { allow read, write: if false; }
   }
 }

@@ -6,10 +6,13 @@ export default defineConfig({
     baseURL: "http://127.0.0.1:5173",
     launchOptions: {
       executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || undefined,
+      args: process.env.PLAYWRIGHT_CHROMIUM_ARGS
+        ? JSON.parse(process.env.PLAYWRIGHT_CHROMIUM_ARGS)
+        : undefined,
     },
   },
   webServer: {
-    command: "npm run dev -- --port 5173",
+    command: "npx vite --host 127.0.0.1 --port 5173",
     url: "http://127.0.0.1:5173",
     reuseExistingServer: !process.env.CI,
   },

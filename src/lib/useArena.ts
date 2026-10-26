@@ -189,7 +189,11 @@ export function useArena() {
       run("닉네임 저장 중", () =>
         saveProfile(db, user.uid, nickname, user.email),
       ),
-    create: () => user && run("방 만드는 중", () => createRoom(db, user.uid)),
+    create: (maxPlayers = 3) =>
+      user &&
+      run("방 만드는 중", () =>
+        createRoom(db, user.uid, undefined, maxPlayers),
+      ),
     join: (input: string) =>
       user && run("방에 참가하는 중", () => joinRoom(db, user.uid, input)),
     leave: () => user && run("방 나가는 중", () => leaveRoom(db, user.uid)),

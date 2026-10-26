@@ -91,7 +91,9 @@ export async function createRoom(
   db: Firestore,
   uid: string,
   nextCode = generateCode,
+  maxPlayers = GAME_CONFIG.maxPlayers,
 ): Promise<string> {
+  if (![2, 3].includes(maxPlayers)) throw new ArenaError("invalid-code");
   for (let attempt = 0; attempt < 8; attempt++) {
     const code = nextCode();
     const result = await membershipTransaction(db, async (tx, observe) => {
@@ -108,7 +110,7 @@ export async function createRoom(
       if (existing.exists()) return false;
       tx.set(doc(db, "rooms", code), {
         hostId: uid,
-        maxPlayers: GAME_CONFIG.maxPlayers,
+        maxPlayers,
         status: "waiting",
         memberIds: [uid],
         members: {
@@ -120,7 +122,7 @@ export async function createRoom(
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      tx.set(directory, { playerCount: 1, maxPlayers: GAME_CONFIG.maxPlayers });
+      tx.set(directory, { playerCount: 1, maxPlayers });
       tx.set(session, { roomCode: code });
       return true;
     });

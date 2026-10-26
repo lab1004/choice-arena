@@ -41,6 +41,10 @@
       }
     ]
   },
+  "functions": {
+    "source": "functions",
+    "predeploy": ["npm --prefix functions run build"]
+  },
   "emulators": {
     "auth": {
       "host": "127.0.0.1",
@@ -49,6 +53,10 @@
     "firestore": {
       "host": "127.0.0.1",
       "port": 8080
+    },
+    "functions": {
+      "host": "127.0.0.1",
+      "port": 5001
     },
     "ui": {
       "enabled": false

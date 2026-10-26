@@ -1,551 +1,1139 @@
-import { useState, type FormEvent } from "react";
 import {
-  ArrowRight,
+  useEffect,
+  useMemo,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import {
+  BrowserRouter,
+  Link,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+import {
+  Cat,
+  Rocket,
+  Compass,
+  Flower,
+  Star,
+  Flame,
+  Moon,
+  Sun,
   Check,
-  ChevronRight,
-  CircleHelp,
   Coins,
   Copy,
-  Crown,
   DoorOpen,
   Gamepad2,
-  Layers3,
+  History,
+  ListChecks,
   LoaderCircle,
   LogOut,
-  Plus,
-  Radio,
-  ShieldCheck,
-  Sparkles,
+  Medal,
+  Settings,
   Users,
   WifiOff,
   X,
   Zap,
 } from "lucide-react";
-import { GAME_CONFIG, normalizeCode, validNickname } from "./domain/game";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { db } from "./lib/firebase";
 import { useArena, type Arena } from "./lib/useArena";
-import { usingEmulators } from "./lib/firebase";
-import { ScenarioPreview } from "./components/ScenarioPreview";
+import {
+  advance,
+  choose,
+  claimQuest,
+  getQuests,
+  getRanking,
+  loadHistory,
+  startMatch,
+  serverNow,
+  updateSettings,
+  vote,
+  watchMatch,
+} from "./lib/gameApi";
+import { normalizeCode, validNickname, type PlayChoice } from "./domain/game";
 import "./styles.css";
-
+const AVATARS = [
+  "avatar-1",
+  "avatar-2",
+  "avatar-3",
+  "avatar-4",
+  "avatar-5",
+  "avatar-6",
+  "avatar-7",
+  "avatar-8",
+];
 function GoogleMark() {
+  return <span className="google-mark">G</span>;
+}
+function Avatar({
+  id = "default",
+  name = "?",
+}: {
+  id?: string;
+  name?: string;
+}) {
+  const icons = [Cat, Rocket, Compass, Flower, Star, Flame, Moon, Sun];
+  const Icon = id.startsWith("avatar-")
+    ? icons[Number(id.slice(7)) - 1]
+    : id === "anonymous"
+      ? Users
+      : undefined;
   return (
-    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24">
-      <path
-        fill="#4285f4"
-        d="M21.6 12.2c0-.7-.1-1.4-.2-2.1H12v4h5.4a4.6 4.6 0 0 1-2 3v2.5h3.3c1.9-1.8 2.9-4.3 2.9-7.4"
-      />
-      <path
-        fill="#34a853"
-        d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.5c-.9.6-2 1-3.4 1-2.6 0-4.9-1.8-5.7-4.1H2.9v2.6A10 10 0 0 0 12 22"
-      />
-      <path
-        fill="#fbbc05"
-        d="M6.3 14a6 6 0 0 1 0-4V7.4H2.9a10 10 0 0 0 0 9.2z"
-      />
-      <path
-        fill="#ea4335"
-        d="M12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.8A9.6 9.6 0 0 0 12 2a10 10 0 0 0-9.1 5.4L6.3 10c.8-2.3 3.1-4.1 5.7-4.1"
-      />
-    </svg>
+    <span
+      className={`avatar ${id}`}
+      aria-label={id === "anonymous" ? "익명 프로필" : `${name} 프로필`}
+    >
+      {Icon ? <Icon size={24} aria-hidden="true" /> : name.slice(0, 1)}
+    </span>
   );
 }
-function NicknameForm({ arena }: { arena: Arena }) {
-  const [nickname, setNickname] = useState("");
+function useStats(uid?: string) {
+  const [v, setV] = useState<any>({ points: 0, games: 0, wins: 0 });
+  useEffect(
+    () =>
+      uid
+        ? onSnapshot(doc(db, "playerStats", uid), (s) =>
+            setV(s.data() || { points: 0, games: 0, wins: 0 }),
+          )
+        : undefined,
+    [uid],
+  );
+  return v;
+}
+function Layout({ arena, children }: { arena: Arena; children: ReactNode }) {
+  const [requestError, setRequestError] = useState("");
+  const location = useLocation();
+  useEffect(() => {
+    const handler = (event: PromiseRejectionEvent) => {
+      event.preventDefault();
+      setRequestError(
+        event.reason instanceof Error
+          ? event.reason.message
+          : "서버 요청에 실패했습니다. 다시 시도하세요.",
+      );
+    };
+    window.addEventListener("unhandledrejection", handler);
+    return () => window.removeEventListener("unhandledrejection", handler);
+  }, []);
+  useEffect(() => setRequestError(""), [location.pathname]);
   return (
-    <section className="panel nickname-panel">
-      <span className="icon-tile">
-        <Sparkles />
-      </span>
-      <p className="eyebrow">첫 번째 선택</p>
-      <h2>어떤 이름으로 만날까요?</h2>
+    <div className="app-shell">
+      <header className="site-header">
+        <Link className="brand" to="/home">
+          <span className="brand-icon">
+            <Zap size={22} />
+          </span>
+          <b>
+            CHOICE <span>ARENA</span>
+          </b>
+        </Link>
+        {arena.user && (
+          <button className="ghost" onClick={() => void arena.logout()}>
+            <LogOut size={17} />
+            로그아웃
+          </button>
+        )}
+      </header>
+      {requestError && (
+        <div className="notice error" role="alert">
+          <span>{requestError}</span>
+          <button
+            className="icon-button"
+            onClick={() => setRequestError("")}
+            aria-label="오류 닫기"
+          >
+            <X />
+          </button>
+        </div>
+      )}
+      {!arena.online && (
+        <div className="notice warning">
+          <WifiOff size={18} />
+          인터넷 연결이 끊겼습니다.
+        </div>
+      )}
+      {arena.error && (
+        <div className="notice error">
+          <span>{arena.error}</span>
+          <button className="icon-button" onClick={arena.dismissError}>
+            <X />
+          </button>
+        </div>
+      )}
+      {arena.busy && (
+        <div className="busy-toast">
+          <LoaderCircle className="spin" /> {arena.busy}
+        </div>
+      )}
+      <main>{children}</main>
+      {arena.user && arena.profile && (
+        <nav className="bottom-nav">
+          <Link to="/home">홈</Link>
+          <Link to="/play">게임</Link>
+          <Link to="/quests">퀘스트</Link>
+          <Link to="/ranking">랭킹</Link>
+          <Link to="/settings">설정</Link>
+        </nav>
+      )}
+    </div>
+  );
+}
+function Guard({ arena, children }: { arena: Arena; children: ReactNode }) {
+  if (arena.loading) return <Loading />;
+  if (!arena.user) return <Navigate to="/login" replace />;
+  if (!arena.profile) return <Navigate to="/onboarding" replace />;
+  return <>{children}</>;
+}
+function Loading() {
+  return (
+    <section className="panel center">
+      <LoaderCircle className="spin" />
+      <h2>아레나에 연결하고 있어요</h2>
+    </section>
+  );
+}
+function Login({ arena }: { arena: Arena }) {
+  if (arena.loading) return <Loading />;
+  if (arena.user)
+    return <Navigate to={arena.profile ? "/home" : "/onboarding"} replace />;
+  return (
+    <section className="auth-card panel">
+      <div className="hero-icon">
+        <Gamepad2 />
+      </div>
+      <p className="eyebrow">같은 상황, 다른 선택</p>
+      <h1>선택이 전략이 되는 곳</h1>
       <p className="muted">
-        게임에서 사용할 닉네임을 정해 주세요.
-        <br />
-        Google 이름과 이메일은 다른 참가자에게 공개되지 않아요.
+        Google 계정으로 로그인하고 친구와 실시간으로 플레이하세요.
       </p>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          void arena.saveNickname(nickname);
-        }}
+      <button
+        className="google-button"
+        disabled={!arena.online}
+        onClick={() => void arena.login()}
       >
-        <label htmlFor="nickname">게임 닉네임</label>
+        <GoogleMark />
+        Google로 시작하기
+      </button>
+    </section>
+  );
+}
+function Onboarding({ arena }: { arena: Arena }) {
+  const [nickname, setNickname] = useState("");
+  const [avatar, setAvatar] = useState("default");
+  if (!arena.user) return <Navigate to="/login" />;
+  if (arena.profile) return <Navigate to="/home" />;
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    await updateSettings(avatar, false, nickname);
+  }
+  return (
+    <section className="panel page-card">
+      <p className="eyebrow">프로필 만들기</p>
+      <h1>아레나에서 사용할 모습을 정하세요</h1>
+      <form onSubmit={(e) => void submit(e)}>
+        <label htmlFor="nickname">닉네임</label>
         <input
           id="nickname"
-          autoComplete="nickname"
-          autoFocus
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
           maxLength={12}
-          placeholder="예: 선택의고수"
-          aria-describedby="nickname-help"
+          onChange={(e) => setNickname(e.target.value)}
+          placeholder="닉네임 입력"
         />
-        <p id="nickname-help" className="field-hint">
-          한글·영문·숫자·밑줄, 2~12자 / 중복 닉네임 사용 가능
-        </p>
+        <label>프로필 사진</label>
+        <div className="avatar-picker">
+          {AVATARS.map((id, i) => (
+            <button
+              type="button"
+              className={avatar === id ? "selected" : ""}
+              onClick={() => setAvatar(id)}
+              key={id}
+            >
+              <Avatar id={id} name={String(i + 1)} />
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => setAvatar("default")}
+        >
+          건너뛰기
+        </button>
         <button
           className="primary full"
-          disabled={
-            !!arena.busy || !arena.online || !validNickname(nickname.trim())
-          }
+          disabled={!validNickname(nickname.trim())}
         >
-          닉네임 저장하고 시작하기 <ArrowRight size={18} />
+          완료
         </button>
       </form>
     </section>
   );
 }
-function HomeActions({ arena }: { arena: Arena }) {
-  const [input, setInput] = useState("");
-  const disabled = !!arena.busy || !arena.canMutate;
+function Home({ arena }: { arena: Arena }) {
+  const stats = useStats(arena.user?.uid);
   return (
-    <div className="home-actions">
-      <section className="panel profile-panel">
-        <div className="avatar">{arena.profile?.nickname.slice(0, 1)}</div>
-        <div>
-          <p className="eyebrow">나의 프로필</p>
-          <h2>{arena.profile?.nickname}</h2>
-          <span className="muted small">오늘은 어떤 선택을 해볼까요?</span>
-        </div>
-        <ShieldCheck className="profile-check" size={22} />
-      </section>
-      <section className="panel create-panel">
-        <div className="card-icon">
-          <Plus />
-        </div>
-        <h2>우리만의 아레나</h2>
-        <p className="muted">
-          방을 만들고 친구를 초대하세요.
-          <br />
-          최대 {GAME_CONFIG.maxPlayers}명이 함께할 수 있어요.
-        </p>
-        <button
-          className="primary full"
-          disabled={disabled}
-          onClick={() => void arena.create()}
-        >
-          새로운 방 만들기 <ArrowRight size={18} />
-        </button>
-      </section>
-      <section className="panel join-panel">
-        <h2>초대받으셨나요?</h2>
-        <p className="muted">친구에게 받은 6자리 코드를 입력하세요.</p>
-        <form
-          onSubmit={(e: FormEvent) => {
-            e.preventDefault();
-            void arena.join(input);
-          }}
-        >
-          <label className="sr-only" htmlFor="room-code">
-            6자리 방 코드
-          </label>
-          <div className="join-input">
-            <input
-              id="room-code"
-              value={input}
-              onChange={(e) => setInput(normalizeCode(e.target.value))}
-              maxLength={GAME_CONFIG.roomCodeLength}
-              autoComplete="off"
-              autoCapitalize="characters"
-              spellCheck={false}
-              placeholder="ABC234"
-            />
-            <button
-              className="secondary"
-              disabled={disabled || input.length !== GAME_CONFIG.roomCodeLength}
-              type="submit"
-            >
-              참가 <ChevronRight size={17} />
-            </button>
+    <div className="page">
+      <section className="home-hero">
+        <p className="eyebrow">WELCOME BACK</p>
+        <h1>{arena.profile?.nickname}님의 다음 선택은?</h1>
+        <div className="point-box">
+          <Coins />
+          <div>
+            <span>보유 포인트</span>
+            <strong>{stats.points || 0} P</strong>
           </div>
-        </form>
+        </div>
       </section>
+      {arena.room?.matchId && arena.room.status === "playing" && (
+        <Link
+          className="resume-card"
+          to={`/matches/${arena.room.matchId}/game`}
+        >
+          진행 중인 경기 계속하기 →
+        </Link>
+      )}
+      <div className="menu-grid">
+        <Link
+          className="menu-card play-card"
+          to={arena.code ? `/rooms/${arena.code}` : "/play"}
+        >
+          <Gamepad2 />
+          <h2>게임 시작</h2>
+          <p>1vs1 또는 1vs1vs1</p>
+        </Link>
+        <Link className="menu-card" to="/quests">
+          <ListChecks />
+          <h3>일일 퀘스트</h3>
+        </Link>
+        <Link className="menu-card" to="/ranking">
+          <Medal />
+          <h3>랭킹</h3>
+        </Link>
+        <Link className="menu-card" to="/history">
+          <History />
+          <h3>내 기록</h3>
+        </Link>
+        <Link className="menu-card" to="/settings">
+          <Settings />
+          <h3>설정</h3>
+        </Link>
+      </div>
+    </div>
+  );
+}
+function Play({ arena }: { arena: Arena }) {
+  const [code, setCode] = useState("");
+  const [capacity, setCapacity] = useState(2);
+  const nav = useNavigate();
+  useEffect(() => {
+    if (arena.code) nav(`/rooms/${arena.code}`);
+  }, [arena.code, nav]);
+  return (
+    <div className="page">
+      <div className="page-heading">
+        <p className="eyebrow">PLAY</p>
+        <h1>게임 시작</h1>
+        <p>인원을 선택하고 방을 만들어 친구를 초대하세요.</p>
+      </div>
+      <div className="two-grid">
+        <section className="panel">
+          <h2>새로운 방</h2>
+          <div className="mode-selector">
+            {[2, 3].map((n) => (
+              <button
+                className={capacity === n ? "primary" : "secondary"}
+                key={n}
+                onClick={() => setCapacity(n)}
+              >
+                {n === 2 ? "1 vs 1" : "1 vs 1 vs 1"}
+              </button>
+            ))}
+          </div>
+          <p className="muted">
+            친구에게 코드를 공유하세요. 최대 3명까지 참가할 수 있습니다.
+          </p>
+          <button
+            className="primary full"
+            onClick={() => void arena.create(capacity)}
+          >
+            방 만들기
+          </button>
+        </section>
+        <section className="panel">
+          <h2>코드로 참가</h2>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void arena.join(code);
+            }}
+          >
+            <input
+              aria-label="6자리 방 코드"
+              value={code}
+              maxLength={6}
+              onChange={(e) => setCode(normalizeCode(e.target.value))}
+              placeholder="6자리 코드 입력"
+            />
+            <button className="secondary full" disabled={code.length !== 6}>
+              참가하기
+            </button>
+          </form>
+        </section>
+      </div>
     </div>
   );
 }
 function Lobby({ arena }: { arena: Arena }) {
-  const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
-  const [confirmLeave, setConfirmLeave] = useState(false);
-  const { room, user, code } = arena;
-  if (!room || !user || !code)
-    return (
-      <section className="panel">
-        <LoaderCircle className="spin" />
-        <h2>
-          {room === null
-            ? "방 정보를 찾을 수 없어요"
-            : "참가 중인 방을 복원하고 있어요"}
-        </h2>
-        <p className="muted">연결이 복구되면 다시 표시됩니다.</p>
-        {room === null && (
-          <button
-            className="secondary"
-            disabled={!!arena.busy || !arena.online}
-            onClick={() => void arena.leave()}
-          >
-            홈으로 돌아가기
-          </button>
-        )}
-      </section>
-    );
-  const isHost = room.hostId === user.uid;
-  const mine = room.members[user.uid];
-  const disabled = !!arena.busy || !arena.canMutate;
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(code!);
-      setCopied(true);
-      setCopyError(false);
-    } catch {
-      setCopyError(true);
-    }
+  const nav = useNavigate(),
+    room = arena.room,
+    user = arena.user;
+  useEffect(() => {
+    if (room?.matchId) nav(`/matches/${room.matchId}/game`);
+    else if (!arena.loading && !arena.code) nav("/home");
+  }, [room?.matchId, arena.loading, arena.code, nav]);
+  if (!room || !user) return <Loading />;
+  const mine = room.members[user.uid],
+    host = room.hostId === user.uid,
+    allReady =
+      room.memberIds.length === room.maxPlayers &&
+      room.memberIds.every((id) => room.members[id].ready);
+  async function start() {
+    const r = (await startMatch(arena.code!)) as any;
+    nav(`/matches/${r.data.matchId}/game`);
   }
   return (
-    <section className="panel lobby">
-      <div className="section-heading">
-        <div>
-          <p className="eyebrow">LOBBY</p>
-          <h2>선택의 시작점</h2>
+    <div className="page">
+      <section className="panel lobby">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">LOBBY</p>
+            <h1>선택의 시작점</h1>
+          </div>
+          <span className="pill">
+            <Users size={15} />
+            {room.memberIds.length}/{room.maxPlayers}
+          </span>
         </div>
-        <span className="pill">
-          <Users size={14} />
-          {room.memberIds.length} / {room.maxPlayers}
-        </span>
-      </div>
-      <div className="invite-box">
-        <div>
-          <span className="muted small">친구에게 초대 코드를 알려 주세요</span>
-          <p className="invite-code">{code}</p>
-        </div>
-        <button
-          className="icon-button"
-          aria-label="초대 코드 복사"
-          onClick={() => void copy()}
-        >
-          {copied ? <Check /> : <Copy size={20} />}
-        </button>
-      </div>
-      <p className="field-hint" role="status">
-        {copyError
-          ? "자동 복사가 안 돼요. 위 코드를 길게 눌러 직접 복사해 주세요."
-          : copied
-            ? "초대 코드를 복사했어요."
-            : "코드를 아는 친구가 정원 내에서 참가할 수 있어요."}
-      </p>
-      <div className="players">
-        {room.memberIds.map((uid, index) => (
-          <div
-            className={`player-row ${uid === user.uid ? "is-me" : ""}`}
-            key={uid}
+        <div className="invite-box">
+          <div>
+            <span>초대 코드</span>
+            <strong>{arena.code}</strong>
+          </div>
+          <button
+            className="icon-button"
+            onClick={() => navigator.clipboard.writeText(arena.code!)}
           >
-            <div className={`avatar avatar-${index % GAME_CONFIG.maxPlayers}`}>
-              {room.members[uid].nickname.slice(0, 1)}
-            </div>
-            <div className="player-name">
-              <strong>{room.members[uid].nickname}</strong>
-              <div className="small muted">
-                {uid === user.uid && <span>나 · </span>}
-                {room.hostId === uid ? (
-                  <span className="host-label">
-                    <Crown size={12} /> 방장
-                  </span>
-                ) : (
-                  "참가자"
+            <Copy />
+          </button>
+        </div>
+        <div className="players">
+          {room.memberIds.map((id, i) => (
+            <div className="player-row" key={id}>
+              <Avatar id={`avatar-${i + 1}`} name={room.members[id].nickname} />
+              <div>
+                <strong>{room.members[id].nickname}</strong>
+                <p>{room.hostId === id ? "방장" : "참가자"}</p>
+                {host && id !== user.uid && (
+                  <button
+                    className="text-button"
+                    disabled={!!arena.busy}
+                    onClick={() => void arena.transfer(id)}
+                  >
+                    방장 위임
+                  </button>
                 )}
               </div>
-            </div>
-            <div className="player-actions">
-              <span
-                className={`ready-tag ${room.members[uid].ready ? "is-ready" : ""}`}
-              >
-                {room.members[uid].ready ? "준비 완료" : "대기 중"}
+              <span className={room.members[id].ready ? "ready" : "waiting"}>
+                {room.members[id].ready ? "준비 완료" : "대기 중"}
               </span>
-              {isHost && uid !== user.uid && (
-                <button
-                  className="text-button"
-                  disabled={disabled}
-                  onClick={() => void arena.transfer(uid)}
-                  aria-label={`${room.members[uid].nickname}에게 방장 위임`}
-                >
-                  방장 위임
-                </button>
-              )}
             </div>
-          </div>
-        ))}
-        {Array.from(
-          { length: Math.max(0, room.maxPlayers - room.memberIds.length) },
-          (_, index) => (
-            <div className="empty-player" key={index}>
-              <div className="empty-avatar">
-                <Plus size={20} />
-              </div>
-              <span>친구를 기다리고 있어요</span>
-            </div>
-          ),
-        )}
-      </div>
-      <button
-        className={mine?.ready ? "secondary full" : "primary full"}
-        disabled={disabled || !mine}
-        onClick={() => void arena.ready(!mine?.ready)}
-      >
-        {mine?.ready ? "준비 취소하기" : "준비 완료"} <Check size={18} />
-      </button>
-      <div className="coming-note">
-        <CircleHelp size={17} />
-        <p>
-          지금은 로그인과 대기실을 이용할 수 있어요.
-          <br />
-          모두 준비해도 경기는 시작되지 않아요.
-        </p>
-      </div>
-      {confirmLeave ? (
-        <div className="leave-confirm">
-          <p>
-            방에서 나갈까요?{" "}
-            {isHost && room.memberIds.length > 1
-              ? "다음 참가자에게 방장이 자동 위임돼요."
-              : room.memberIds.length === 1
-                ? "마지막 참가자가 나가면 방이 삭제돼요."
-                : "다시 참가하려면 초대 코드가 필요해요."}
-          </p>
-          <div>
-            <button
-              className="secondary"
-              disabled={disabled}
-              onClick={() => setConfirmLeave(false)}
-            >
-              취소
-            </button>
-            <button
-              className="danger"
-              disabled={disabled}
-              onClick={() => void arena.leave()}
-            >
-              방 나가기
-            </button>
-          </div>
+          ))}
         </div>
-      ) : (
         <button
-          className="text-button leave-button"
-          disabled={disabled}
-          onClick={() => setConfirmLeave(true)}
+          className="secondary full"
+          disabled={!!arena.busy || !arena.canMutate}
+          onClick={() => void arena.ready(!mine.ready)}
         >
-          <DoorOpen size={17} /> 방 나가기
+          {mine.ready ? "준비 취소" : "준비 완료"}
+          <Check />
         </button>
+        {host && (
+          <button
+            className="primary full"
+            disabled={!allReady || !!arena.busy}
+            onClick={() => void start()}
+          >
+            경기 시작
+          </button>
+        )}
+        <button
+          className="text-button leave"
+          onClick={() => {
+            if (window.confirm("방에서 나갈까요?")) void arena.leave();
+          }}
+        >
+          <DoorOpen />방 나가기
+        </button>
+      </section>
+    </div>
+  );
+}
+function useMatch(id?: string) {
+  const [match, setMatch] = useState<any>(),
+    [error, setError] = useState("");
+  useEffect(
+    () =>
+      id ? watchMatch(id, setMatch, (e) => setError(e.message)) : undefined,
+    [id],
+  );
+  return { match, error };
+}
+function useCountdown(deadline: any, onDone: () => void) {
+  const [left, setLeft] = useState(0);
+  useEffect(() => {
+    if (!deadline) return;
+    let lastAttempt = 0;
+    const tick = () => {
+      const ms = Math.max(0, deadline.toMillis() - serverNow());
+      setLeft(Math.ceil(ms / 1000));
+      if (ms === 0 && Date.now() - lastAttempt > 2500) {
+        lastAttempt = Date.now();
+        onDone();
+      }
+    };
+    tick();
+    const t = setInterval(tick, 250);
+    return () => clearInterval(t);
+  }, [deadline, onDone]);
+  return left;
+}
+function MatchPage({ arena }: { arena: Arena }) {
+  const { matchId } = useParams(),
+    { match, error } = useMatch(matchId),
+    [picked, setPicked] = useState(""),
+    [sent, setSent] = useState(false);
+  const done = useMemo(
+    () => () => {
+      if (matchId) void advance(matchId).catch(() => {});
+    },
+    [matchId],
+  );
+  useEffect(() => {
+    if (matchId) void advance(matchId).catch(() => {});
+  }, [matchId]);
+  const left = useCountdown(match?.deadline, done);
+  useEffect(() => {
+    setPicked("");
+    setSent(false);
+  }, [match?.round, match?.phase]);
+  if (error) return <div className="notice error">{error}</div>;
+  if (!match) return <Loading />;
+  const confirmed = sent || match.selectedIds?.includes(arena.user!.uid);
+  if (match.phase === "finished")
+    return <Navigate to={`/matches/${matchId}/result`} replace />;
+  if (match.phase === "modeVote")
+    return (
+      <VotePanel
+        key="mode"
+        title="게임 방식을 선택하세요"
+        options={[
+          ["story", "스토리 모드"],
+          ["random", "랜덤 모드"],
+        ]}
+        left={left}
+        onVote={(v) => vote(matchId!, v)}
+      />
+    );
+  if (match.phase === "themeVote")
+    return (
+      <VotePanel
+        key="theme"
+        title="스토리 테마를 선택하세요"
+        options={[
+          ["island", "무인도 생존"],
+          ["medieval", "중세 도시"],
+          ["space", "우주 탐사"],
+          ["mansion", "미스터리 저택"],
+        ]}
+        left={left}
+        onVote={(v) => vote(matchId!, v)}
+      />
+    );
+  const me = arena.user?.uid,
+    eliminated = me && !match.alive[me];
+  return (
+    <div className="game-page">
+      <header className="game-status">
+        <span>
+          {match.round}/{match.totalRounds} 라운드
+        </span>
+        <strong>
+          {match.phase === "countdown"
+            ? `결과 공개까지 ${left}`
+            : match.phase === "reveal"
+              ? `다음 라운드까지 ${left}`
+              : `${left}초`}
+        </strong>
+        <span>
+          <Coins /> {me ? match.coins[me] : 0}
+        </span>
+      </header>
+      <div className="score-strip">
+        {match.participants.map((id: string) => (
+          <span key={id} className={!match.alive[id] ? "eliminated" : ""}>
+            {match.participantNames[id]} · {match.coins[id]}코인
+          </span>
+        ))}
+      </div>
+      {eliminated && match.phase !== "reveal" ? (
+        <section className="panel center">
+          <h2>탈락했습니다</h2>
+          <p>남은 경기를 관전하고 있습니다.</p>
+        </section>
+      ) : match.phase === "playing" ? (
+        <section className="scenario">
+          <p className="eyebrow">{match.currentScenario.themeId}</p>
+          <h1>{match.currentScenario.title}</h1>
+          <p>{match.currentScenario.description}</p>
+          <div className="choice-list">
+            {match.currentScenario.choices.map((c: PlayChoice, i: number) => (
+              <ChoiceCard
+                key={c.id}
+                choice={c}
+                number={i + 1}
+                coins={match.coins[me!]}
+                selected={picked === c.id}
+                disabled={confirmed}
+                onClick={() => setPicked(c.id)}
+              />
+            ))}
+          </div>
+          <button
+            className="primary full confirm-choice"
+            disabled={!picked || confirmed}
+            onClick={async () => {
+              if (
+                !window.confirm(
+                  "이 선택을 확정할까요? 이후에는 바꿀 수 없습니다.",
+                )
+              )
+                return;
+              setSent(true);
+              try {
+                await choose(matchId!, picked, match.round);
+              } catch (e) {
+                setSent(false);
+                window.alert(
+                  e instanceof Error
+                    ? e.message
+                    : "선택을 저장하지 못했습니다.",
+                );
+              }
+            }}
+          >
+            {confirmed
+              ? "선택 완료 · 다른 플레이어를 기다리는 중"
+              : "선택 확정"}
+          </button>
+        </section>
+      ) : match.phase === "reveal" ? (
+        <Results match={match} />
+      ) : (
+        <section className="panel center">
+          <LoaderCircle className="spin" />
+          <h2>모든 선택이 끝났습니다</h2>
+          <p>{left}초 후 결과를 공개합니다.</p>
+        </section>
       )}
-      <p className="field-hint">
-        창을 닫거나 연결이 끊겨도 자리는 유지돼요. 퇴장은 ‘방 나가기’를 눌러
-        주세요. 참가자별 접속 여부는 표시하지 않아요.
-      </p>
+    </div>
+  );
+}
+function ChoiceCard({
+  choice: c,
+  number,
+  coins,
+  selected,
+  disabled,
+  onClick,
+}: {
+  choice: PlayChoice;
+  number: number;
+  coins: number;
+  selected: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const insufficient = coins < c.requiredCost;
+  return (
+    <button
+      className={`choice-card ${selected ? "selected" : ""}`}
+      disabled={disabled || insufficient}
+      onClick={onClick}
+    >
+      <div className="choice-title">
+        <b>
+          {number}. {c.title}
+        </b>
+        <span>필요 비용 {c.requiredCost}코인</span>
+      </div>
+      <div className="odds">
+        <span>성공 {c.successProbability}%</span>
+        <span>실패 {100 - c.successProbability}%</span>
+      </div>
+      <div className="outcomes">
+        <span className="gain">성공 시 {signed(c.successNetChange)}</span>
+        <span className="loss">실패 시 {signed(c.failureNetChange)}</span>
+      </div>
+      {insufficient && <em>코인이 부족합니다</em>}
+    </button>
+  );
+}
+const signed = (n: number) =>
+  n === 0 ? "변화 없음" : `${n > 0 ? "+" : ""}${n}코인`;
+function Results({ match }: { match: any }) {
+  return (
+    <section className="panel results">
+      <p className="eyebrow">ROUND RESULT</p>
+      <h1>선택의 결과</h1>
+      {match.results?.map((r: any) => (
+        <article key={r.key}>
+          <div>
+            <strong>{match.participantNames[r.uid]}</strong>
+            <p>{r.choiceTitle}</p>
+          </div>
+          <div>
+            <b className={r.success ? "gain" : "loss"}>
+              {r.success ? "성공" : "실패"} · {signed(r.change)}
+            </b>
+            <p>{r.text}</p>
+            <span>{r.coins}코인</span>
+          </div>
+        </article>
+      ))}
     </section>
   );
 }
-export default function App() {
-  const arena = useArena();
+function VotePanel({
+  title,
+  options,
+  left,
+  onVote,
+}: {
+  title: string;
+  options: string[][];
+  left: number;
+  onVote: (v: string) => Promise<any>;
+}) {
+  const [done, setDone] = useState(false);
   return (
-    <div className="app-shell">
-      <header className="site-header">
-        <a className="brand" href="/" aria-label="초이스 아레나 홈">
-          <span className="brand-icon">
-            <Zap size={24} fill="currentColor" />
-          </span>
-          <span>
-            CHOICE<span className="brand-light"> ARENA</span>
-          </span>
-        </a>
-        <div className="header-right">
-          <span className="alpha-badge">EARLY ACCESS</span>
-          {arena.user && (
+    <section className="panel vote-panel">
+      <p className="timer">{left}초</p>
+      <h1>{title}</h1>
+      <div className="choice-list">
+        {options.map(([v, l]) => (
+          <button
+            className="choice-card"
+            disabled={done}
+            onClick={() => {
+              setDone(true);
+              void onVote(v).catch((e) => {
+                setDone(false);
+                throw e;
+              });
+            }}
+            key={v}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
+      {done && <p>투표 완료 · 다른 플레이어를 기다리는 중</p>}
+    </section>
+  );
+}
+function ResultPage({ arena }: { arena: Arena }) {
+  const { matchId } = useParams(),
+    { match, error } = useMatch(matchId);
+  if (error) return <div className="notice error">{error}</div>;
+  if (!match) return <Loading />;
+  if (match.phase !== "finished")
+    return <Navigate to={`/matches/${matchId}/game`} replace />;
+  const me = arena.user!.uid,
+    won = match.winners?.includes(me),
+    draw = match.winners?.length === 0;
+  return (
+    <section className="panel final-result">
+      <Medal size={50} />
+      <p className="eyebrow">MATCH COMPLETE</p>
+      <h1>{draw ? "무승부" : won ? "승리했습니다!" : "경기가 끝났습니다"}</h1>
+      <strong>{match.coins[me]}코인</strong>
+      <p>획득 포인트 +{match.rewards?.[me] || 0}P</p>
+      <div className="final-ranking">
+        {[...match.participants]
+          .sort((a, b) => match.coins[b] - match.coins[a])
+          .map((id: string) => (
+            <div key={id}>
+              <span>
+                {1 +
+                  match.participants.filter(
+                    (other: string) => match.coins[other] > match.coins[id],
+                  ).length}
+                위 {match.participantNames[id]}
+              </span>
+              <b>{match.coins[id]}코인</b>
+            </div>
+          ))}
+      </div>
+      <Link className="primary link-button" to="/home">
+        홈으로
+      </Link>
+    </section>
+  );
+}
+function Quests() {
+  const [data, setData] = useState<any>(),
+    [busy, setBusy] = useState(""),
+    [error, setError] = useState("");
+  const load = () =>
+    getQuests()
+      .then((r: any) => {
+        setData(r.data);
+        setError("");
+      })
+      .catch((e) => setError(e.message));
+  useEffect(() => {
+    void load();
+  }, []);
+  if (error)
+    return (
+      <section className="panel">
+        <p role="alert">{error}</p>
+        <button className="secondary" onClick={() => void load()}>
+          다시 시도
+        </button>
+      </section>
+    );
+  if (!data) return <Loading />;
+  return (
+    <div className="page">
+      <div className="page-heading">
+        <p className="eyebrow">DAILY QUEST</p>
+        <h1>오늘의 퀘스트</h1>
+        <p>{data.day} · 매일 4개가 새로 배정됩니다.</p>
+      </div>
+      <div className="quest-list">
+        {data.quests.map((q: any) => (
+          <section className="panel quest" key={q.id}>
+            <div>
+              <h3>{q.title}</h3>
+              <p>
+                {q.progress}/{q.target}
+              </p>
+            </div>
+            <progress max={q.target} value={q.progress} />
             <button
-              className="text-button"
-              disabled={!!arena.busy}
-              onClick={() => void arena.logout()}
-              title="로그아웃해도 참가 중인 방은 유지됩니다"
+              className="secondary"
+              disabled={q.claimed || q.progress < q.target || busy === q.id}
+              onClick={async () => {
+                setBusy(q.id);
+                try {
+                  await claimQuest(q.id);
+                  await load();
+                } finally {
+                  setBusy("");
+                }
+              }}
             >
-              <LogOut size={16} />
-              <span>로그아웃</span>
+              {q.claimed ? "수령 완료" : `+${q.rewardPoints}P 받기`}
             </button>
-          )}
-        </div>
-      </header>
-      <main>
-        <div className="page-topline">
-          <span>
-            <span className="status-dot" /> 선택이 이야기가 되는 곳
-          </span>
-          <span className="version">LOBBY · v0.1</span>
-        </div>
-        {usingEmulators && (
-          <div className="notice">
-            Firebase Emulator 연결 중 · 테스트 데이터 환경
-          </div>
-        )}
-        {!arena.online && (
-          <div className="notice warning" role="status">
-            <WifiOff size={18} /> 인터넷 연결이 끊겼어요. 참가 중인 방은
-            유지되며, 재연결 후 복원됩니다.
-          </div>
-        )}
-        {arena.error && (
-          <div className="notice error" role="alert">
-            <span>{arena.error}</span>
-            <button className="text-button" onClick={arena.reconnect}>
-              다시 연결
-            </button>
-            <button
-              className="icon-button"
-              aria-label="오류 안내 닫기"
-              onClick={arena.dismissError}
-            >
-              <X size={18} />
-            </button>
-          </div>
-        )}
-        {arena.busy && (
-          <div className="busy-toast" role="status">
-            <LoaderCircle size={18} className="spin" />
-            {arena.busy}…
-          </div>
-        )}
-        <section className="intro">
-          <span className="eyebrow accent">SAME WORLD. YOUR CHOICE.</span>
-          <h1>
-            같은 상황.
-            <br />
-            <span>다른 선택.</span> 새로운 이야기.
-          </h1>
-          <p>
-            정답은 없어도, 전략은 있다.
-            <br className="mobile-break" /> 친구와 함께 당신만의 선택을 펼쳐
-            보세요.
-          </p>
-          <div className="game-facts">
-            <span>
-              <Users size={16} /> 최대 {GAME_CONFIG.maxPlayers}인
-            </span>
-            <span>
-              <Coins size={16} /> 경기마다{" "}
-              {GAME_CONFIG.startingCoins.toLocaleString("ko-KR")}코인
-            </span>
-            <span>
-              <Layers3 size={16} /> 세 가지 선택
-            </span>
-          </div>
-        </section>
-        <div className="main-grid">
-          <div className="interaction-column">
-            {arena.loading ? (
-              <section className="panel loading-panel">
-                <LoaderCircle className="spin" />
-                <h2>아레나에 연결하고 있어요</h2>
-                <p className="muted">로그인과 참가 정보를 확인하고 있어요.</p>
-                <button className="text-button" onClick={arena.reconnect}>
-                  연결 다시 시도
-                </button>
-              </section>
-            ) : !arena.user ? (
-              <section className="panel welcome-panel">
-                <span className="icon-tile">
-                  <Gamepad2 size={28} />
-                </span>
-                <p className="eyebrow">당신의 다음 선택은?</p>
-                <h2>
-                  함께할수록 흥미로운
-                  <br />
-                  선택의 세계
-                </h2>
-                <p className="muted">
-                  Google 계정으로 시작하고
-                  <br />
-                  친구들과 만날 대기실을 만들어 보세요.
-                </p>
-                <button
-                  className="google-button"
-                  disabled={!!arena.busy || !arena.online}
-                  onClick={() => void arena.login()}
-                >
-                  <GoogleMark /> Google로 시작하기 <ArrowRight size={18} />
-                </button>
-                <div className="login-note">
-                  <ShieldCheck size={15} />
-                  <span>게임 닉네임만 다른 참가자에게 보여요</span>
-                </div>
-                <div className="welcome-bottom">
-                  <span className="mini-dot" /> 로그인 · 친구 초대 · 실시간
-                  대기실 이용 가능
-                </div>
-              </section>
-            ) : !arena.profile ? (
-              <NicknameForm arena={arena} />
-            ) : arena.code ? (
-              <Lobby key={arena.code} arena={arena} />
-            ) : (
-              <HomeActions arena={arena} />
-            )}
-            {arena.user &&
-              arena.profile &&
-              !arena.canMutate &&
-              arena.online && (
-                <p className="connection-note" role="status">
-                  <Radio size={15} /> 서버 연결을 확인하고 있어요. 확인 후 방을
-                  변경할 수 있어요.
-                </p>
-              )}
-          </div>
-          <ScenarioPreview />
-        </div>
-        <section className="how-it-works" aria-labelledby="how-title">
-          <div className="section-heading">
-            <h2 id="how-title">작은 선택, 무한한 가능성</h2>
-            <span className="muted small">우리가 만들어 갈 게임</span>
-          </div>
-          <div className="feature-grid">
-            <article>
-              <span className="feature-number">01</span>
-              <h3>하나의 상황을 마주하고</h3>
-              <p>
-                일상부터 생존, 판타지, SF까지.
-                <br />
-                다양한 세계의 이야기가 펼쳐져요.
-              </p>
-            </article>
-            <article>
-              <span className="feature-number">02</span>
-              <h3>나만의 전략을 선택하고</h3>
-              <p>
-                동일한 {GAME_CONFIG.startingCoins.toLocaleString("ko-KR")}
-                코인으로 시작해
-                <br />세 가지 행동 중 하나를 선택해요.
-              </p>
-            </article>
-            <article>
-              <span className="feature-number">03</span>
-              <h3>서로의 결과를 비교해요</h3>
-              <p>
-                코인, 아이템, 상태의 변화가
-                <br />
-                어떤 이야기를 만들지 확인해요.
-              </p>
-            </article>
-          </div>
-        </section>
-        <div className="roadmap">
-          <Sparkles size={18} />
-          <span>다음 업데이트</span>
-          <p>
-            경기 진행 · 출석 · 랭크 <span className="pill subtle">준비 중</span>
-          </p>
-        </div>
-      </main>
-      <footer>
-        <span className="footer-brand">CHOICE ARENA</span>
-        <p>베팅 없이, 결제 없이. 오직 선택과 전략으로.</p>
-        <span>매 경기 동일한 출발선</span>
-      </footer>
+          </section>
+        ))}
+      </div>
     </div>
+  );
+}
+function Ranking() {
+  const [rows, setRows] = useState<any[]>(),
+    [error, setError] = useState("");
+  const load = () =>
+    getRanking()
+      .then((r: any) => {
+        setRows(r.data.rows);
+        setError("");
+      })
+      .catch((e) => setError(e.message));
+  useEffect(() => {
+    void load();
+  }, []);
+  if (error)
+    return (
+      <section className="panel">
+        <p role="alert">{error}</p>
+        <button className="secondary" onClick={() => void load()}>
+          다시 시도
+        </button>
+      </section>
+    );
+  if (!rows) return <Loading />;
+  let prev = -1,
+    rank = 0;
+  return (
+    <div className="page">
+      <div className="page-heading">
+        <p className="eyebrow">RANKING</p>
+        <h1>포인트 랭킹</h1>
+      </div>
+      <section className="panel ranking">
+        {rows.map((r, i) => {
+          if (r.points !== prev) {
+            rank = i + 1;
+            prev = r.points;
+          }
+          return (
+            <div className="rank-row" key={r.key}>
+              <b>{rank}</b>
+              <Avatar id={r.avatarId} name={r.nickname} />
+              <div>
+                <strong>{r.nickname}</strong>
+                <p>
+                  {r.games}경기 · {r.wins}승
+                </p>
+              </div>
+              <span>{r.points} P</span>
+            </div>
+          );
+        })}
+      </section>
+    </div>
+  );
+}
+function HistoryPage({ arena }: { arena: Arena }) {
+  const [rows, setRows] = useState<any[]>();
+  useEffect(() => {
+    if (arena.user) void loadHistory(arena.user.uid).then(setRows);
+  }, [arena.user]);
+  if (!rows) return <Loading />;
+  return (
+    <div className="page">
+      <div className="page-heading">
+        <p className="eyebrow">HISTORY</p>
+        <h1>내 기록</h1>
+      </div>
+      {rows.length === 0 ? (
+        <section className="panel center">아직 완료한 경기가 없습니다.</section>
+      ) : (
+        <div className="history-list">
+          {rows.map((r) => (
+            <section className="panel history-card" key={r.id}>
+              <b>
+                {r.result === "win"
+                  ? "승리"
+                  : r.result === "draw"
+                    ? "무승부"
+                    : r.result === "eliminated"
+                      ? "탈락"
+                      : "패배"}
+              </b>
+              <span>
+                {r.playerMode === "duel" ? "1vs1" : "1vs1vs1"} ·{" "}
+                {r.gameMode === "story" ? "스토리" : "랜덤"}
+              </span>
+              <strong>
+                {r.finalCoins}코인 · +{r.points}P
+              </strong>
+              <div className="history-details">
+                <p>
+                  {r.finishedAt?.toDate().toLocaleDateString("ko-KR")} ·{" "}
+                  {r.rank}위
+                </p>
+                <details>
+                  <summary>라운드별 기록</summary>
+                  {r.roundHistory?.map((round: any) => {
+                    const result = round.results.find(
+                      (x: any) => x.uid === arena.user!.uid,
+                    );
+                    return result ? (
+                      <article key={round.round}>
+                        <b>
+                          {round.round}라운드 · {round.title}
+                        </b>
+                        <p>
+                          {result.choiceTitle} ·{" "}
+                          {result.success ? "성공" : "실패"} ·{" "}
+                          {signed(result.change)} → {result.coins}코인
+                        </p>
+                      </article>
+                    ) : null;
+                  })}
+                </details>
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+function SettingsPage({ arena }: { arena: Arena }) {
+  const [avatar, setAvatar] = useState("default"),
+    [anonymous, setAnonymous] = useState(false),
+    [saved, setSaved] = useState(false),
+    [nickname, setNickname] = useState(arena.profile?.nickname || "");
+  useEffect(() => {
+    if (arena.user)
+      void getDoc(doc(db, "settings", arena.user.uid)).then((s) => {
+        setAvatar(s.data()?.avatarId || "default");
+        setAnonymous(!!s.data()?.anonymous);
+      });
+  }, [arena.user]);
+  return (
+    <section className="panel page-card">
+      <p className="eyebrow">SETTINGS</p>
+      <h1>프로필 설정</h1>
+      <label htmlFor="edit-nickname">닉네임</label>
+      <input
+        id="edit-nickname"
+        value={nickname}
+        maxLength={12}
+        onChange={(e) => setNickname(e.target.value)}
+      />
+      <label>프로필 사진</label>
+      <div className="avatar-picker">
+        {AVATARS.map((id, i) => (
+          <button
+            className={avatar === id ? "selected" : ""}
+            onClick={() => setAvatar(id)}
+            key={id}
+          >
+            <Avatar id={id} name={String(i + 1)} />
+          </button>
+        ))}
+      </div>
+      <label className="toggle">
+        <input
+          type="checkbox"
+          checked={anonymous}
+          onChange={(e) => setAnonymous(e.target.checked)}
+        />
+        <span>랭킹에서 익명으로 표시</span>
+      </label>
+      <button
+        className="primary full"
+        disabled={!validNickname(nickname.trim())}
+        onClick={async () => {
+          await updateSettings(avatar, anonymous, nickname);
+          setSaved(true);
+        }}
+      >
+        저장
+      </button>
+      {saved && <p className="success-note">저장했습니다.</p>}
+    </section>
+  );
+}
+function AppRoutes() {
+  const arena = useArena(),
+    loc = useLocation();
+  return (
+    <Layout arena={arena}>
+      <Routes location={loc}>
+        <Route path="/login" element={<Login arena={arena} />} />
+        <Route path="/onboarding" element={<Onboarding arena={arena} />} />
+        <Route
+          path="/home"
+          element={
+            <Guard arena={arena}>
+              <Home arena={arena} />
+            </Guard>
+          }
+        />
+        <Route
+          path="/play"
+          element={
+            <Guard arena={arena}>
+              <Play arena={arena} />
+            </Guard>
+          }
+        />
+        <Route
+          path="/rooms/:roomId"
+          element={
+            <Guard arena={arena}>
+              <Lobby arena={arena} />
+            </Guard>
+          }
+        />
+        <Route
+          path="/matches/:matchId/vote"
+          element={
+            <Guard arena={arena}>
+              <MatchPage arena={arena} />
+            </Guard>
+          }
+        />
+        <Route
+          path="/matches/:matchId/game"
+          element={
+            <Guard arena={arena}>
+              <MatchPage arena={arena} />
+            </Guard>
+          }
+        />
+        <Route
+          path="/matches/:matchId/result"
+          element={
+            <Guard arena={arena}>
+              <ResultPage arena={arena} />
+            </Guard>
+          }
+        />
+        <Route
+          path="/quests"
+          element={
+            <Guard arena={arena}>
+              <Quests />
+            </Guard>
+          }
+        />
+        <Route
+          path="/ranking"
+          element={
+            <Guard arena={arena}>
+              <Ranking />
+            </Guard>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <Guard arena={arena}>
+              <HistoryPage arena={arena} />
+            </Guard>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <Guard arena={arena}>
+              <SettingsPage arena={arena} />
+            </Guard>
+          }
+        />
+        <Route path="*" element={<Navigate to="/home" replace />} />
+      </Routes>
+    </Layout>
+  );
+}
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
