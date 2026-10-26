@@ -81,8 +81,13 @@ export async function saveProfile(
   await runTransaction(db, async (tx) => {
     const ref = doc(db, "profiles", uid);
     const existing = await tx.get(ref);
+    const prior = existing.data();
+    const changingNickname = !!prior && prior.nickname !== nickname;
+    if (changingNickname && prior?.nicknameChangeUsed)
+      throw new ArenaError("nickname-locked");
     tx.set(ref, {
       nickname,
+      nicknameChangeUsed: changingNickname || (prior?.nicknameChangeUsed ?? false),
       avatarId,
       rankingAnonymous,
       createdAt: existing.data()?.createdAt ?? serverTimestamp(),
