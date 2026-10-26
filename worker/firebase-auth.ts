@@ -56,7 +56,7 @@ export async function verifyFirebaseToken(header: string | null, project: string
 
   function validateSignature(jwk: Jwk): string {
     try {
-      const publicKey = createPublicKey({ key: jwk as JsonWebKey, format: "jwk" });
+      const publicKey = createPublicKey({ key: jwk as unknown as Record<string, string>, format: "jwk" });
       if (!verifySignature("RSA-SHA256", Buffer.from(segments[0] + "." + segments[1]),
         publicKey, Buffer.from(segments[2], "base64url")))
         throw new Error("signature mismatch");
