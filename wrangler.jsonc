@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "choice-arena-game",
+  "name": "choice-arena",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-26",
   "workers_dev": true,
