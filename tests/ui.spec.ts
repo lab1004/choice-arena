@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-for (const width of [320, 390, 768, 1440]) {
+for (const width of [360, 390, 768, 1440]) {
   test(`${width}px: login, readable feature scope and no horizontal overflow`, async ({
     page,
   }) => {
@@ -10,10 +10,10 @@ for (const width of [320, 390, 768, 1440]) {
     await expect(
       page.getByRole("button", { name: "Google로 시작하기" }),
     ).toBeEnabled();
+    await expect(page).toHaveURL(/\/login$/);
     await expect(
-      page.getByText("화면 예시예요. 상황 선택과 경기 진행은 추후 제공됩니다."),
+      page.getByRole("heading", { name: "초이스 아레나", exact: true }),
     ).toBeVisible();
-    await expect(page.getByText("준비 중", { exact: true })).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -47,3 +47,29 @@ test("offline state explains recovery and prevents new login", async ({
   await context.setOffline(false);
   await expect(login).toBeEnabled();
 });
+
+for (const path of [
+  "/home",
+  "/onboarding",
+  "/play",
+  "/rooms/ABC234",
+  "/matches/unknown/vote",
+  "/matches/unknown",
+  "/matches/unknown/result",
+  "/attendance",
+  "/ranking",
+  "/history",
+  "/customize",
+  "/settings",
+]) {
+  test(`unauthenticated direct access and reload: ${path}`, async ({
+    page,
+  }) => {
+    await page.goto(path);
+    await expect(page).toHaveURL(/\/login$/);
+    await page.reload();
+    await expect(
+      page.getByRole("button", { name: "Google로 시작하기" }),
+    ).toBeEnabled();
+  });
+}
