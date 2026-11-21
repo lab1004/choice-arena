@@ -14,3 +14,13 @@ if (process.argv.includes("--check")) {
   if (readFileSync(target, "utf8") !== output)
     throw new Error("보안 규칙을 npm run rules:generate 명령으로 갱신하세요.");
 } else writeFileSync(target, output);
+
+const serverConfig = new URL(
+  "../functions/src/shared/config.json",
+  import.meta.url,
+);
+const serverOutput = JSON.stringify(config, null, 2) + "\n";
+if (process.argv.includes("--check")) {
+  if (readFileSync(serverConfig, "utf8") !== serverOutput)
+    throw new Error("서버 설정을 npm run rules:generate 명령으로 갱신하세요.");
+} else writeFileSync(serverConfig, serverOutput);

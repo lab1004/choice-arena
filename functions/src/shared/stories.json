@@ -1,0 +1,2046 @@
+[
+  {
+    "id": "island",
+    "name": "무인도 생존",
+    "summary": "폭풍이 오기 전, 구조 신호를 보낼 길을 찾으세요.",
+    "scenarios": [
+      {
+        "id": "island-01",
+        "themeId": "island",
+        "round": 1,
+        "title": "부서진 구명보트",
+        "description": "해변에 쓸 만한 물자가 흩어져 있다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "엔진 부품을 찾는다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "수리할 부품을 발견했다.",
+            "failureText": "‘엔진 부품을 찾는다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "해안선을 살핀다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "안전한 길을 확인했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "식량 상자를 챙긴다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "며칠 버틸 식량을 얻었다.",
+            "failureText": "‘식량 상자를 챙긴다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "island-02",
+        "themeId": "island",
+        "round": 2,
+        "title": "첫 번째 밤",
+        "description": "비구름이 몰려온다. 잠자리부터 정해야 한다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "해변에서 불을 피운다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "불빛이 멀리까지 퍼졌다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "나뭇가지로 쉼터를 짓는다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "비를 피할 쉼터를 만들었다.",
+            "failureText": "‘나뭇가지로 쉼터를 짓는다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "동굴을 조사한다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "동굴 안에서 도구를 찾았다.",
+            "failureText": "‘동굴을 조사한다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "island-03",
+        "themeId": "island",
+        "round": 3,
+        "title": "폭풍 전의 낡은 다리",
+        "description": "섬 반대편에서 구조 신호로 보이는 연기가 피어오른다. 유일한 다리는 금방이라도 무너질 것처럼 흔들리고 있다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "다리를 보수한다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -300,
+            "successText": "보수한 다리를 건너 구조 장비를 발견했다.",
+            "failureText": "다리가 무너져 보수 자재와 일부 물자를 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "바로 건너간다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 300,
+            "failureNetChange": -200,
+            "successText": "무사히 반대편에 도착해 유용한 물자를 챙겼다.",
+            "failureText": "흔들리는 다리에서 물자를 떨어뜨렸다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "안전한 우회로를 찾는다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "시간이 걸렸지만 안전하게 반대편에 도착했다.",
+            "failureText": "변화가 없다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "island-04",
+        "themeId": "island",
+        "round": 4,
+        "title": "낡은 무전기",
+        "description": "파도에 떠밀려 온 무전기가 간헐적으로 켜진다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "높은 곳으로 옮긴다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "수신이 조금 좋아졌다.",
+            "failureText": "‘높은 곳으로 옮긴다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "부품을 아껴 둔다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "다음 기회를 준비했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "배터리를 분해해 고친다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "짧은 구조 신호를 보냈다.",
+            "failureText": "‘배터리를 분해해 고친다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "island-05",
+        "themeId": "island",
+        "round": 5,
+        "title": "폭풍 전야",
+        "description": "큰비가 시작되기 전, 시간은 많지 않다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "해안 신호를 크게 만든다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "구조선이 볼 만한 표식을 만들었다.",
+            "failureText": "‘해안 신호를 크게 만든다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "a",
+            "title": "식량을 방수 포장한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "식량 손실을 막았다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "b",
+            "title": "쉼터를 보강한다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "폭풍에도 버틸 수 있게 됐다.",
+            "failureText": "‘쉼터를 보강한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "island-06",
+        "themeId": "island",
+        "round": 6,
+        "title": "밀려온 상자",
+        "description": "폭풍 뒤, 잠긴 화물 상자가 나타났다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "공구로 자물쇠를 연다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "튼튼한 손전등을 얻었다.",
+            "failureText": "‘공구로 자물쇠를 연다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "상자를 뗏목 재료로 쓴다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "탈출 수단이 생겼다.",
+            "failureText": "‘상자를 뗏목 재료로 쓴다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "표류물부터 정리한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "쓸 수 있는 재료를 골랐다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "island-07",
+        "themeId": "island",
+        "round": 7,
+        "title": "낯선 연기",
+        "description": "섬 반대편에서 연기가 올라온다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "신호탄을 쏜다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "멀리서 답신이 왔다.",
+            "failureText": "‘신호탄을 쏜다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "안전한 길을 우회한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "위험한 늪을 피했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "곧장 연기 쪽으로 간다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "다른 생존자의 흔적을 찾았다.",
+            "failureText": "‘곧장 연기 쪽으로 간다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "island-08",
+        "themeId": "island",
+        "round": 8,
+        "title": "바닷물과 샘물",
+        "description": "남은 물통은 하나뿐이다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "물 사용을 엄격히 제한한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "위기를 넘길 여유가 생겼다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "샘물 근처에 저장소를 만든다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "깨끗한 물을 확보했다.",
+            "failureText": "‘샘물 근처에 저장소를 만든다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "간이 증류기를 만든다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "바닷물을 일부 마실 수 있게 됐다.",
+            "failureText": "‘간이 증류기를 만든다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "island-09",
+        "themeId": "island",
+        "round": 9,
+        "title": "바위 절벽",
+        "description": "정상에서는 구조 신호를 보낼 수 있지만 길이 험하다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "밧줄로 절벽을 오른다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "멀리 지나가는 배를 발견했다.",
+            "failureText": "‘밧줄로 절벽을 오른다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "우회로를 찾는다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "안전한 길을 확보했다.",
+            "failureText": "‘우회로를 찾는다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "해변 신호를 강화한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "눈에 띄는 SOS를 만들었다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "island-10",
+        "themeId": "island",
+        "round": 10,
+        "title": "낡은 지도",
+        "description": "상자 안 지도에는 작은 선착장이 표시돼 있다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "현재 위치를 다시 측정한다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "잘못된 길을 피했다.",
+            "failureText": "‘현재 위치를 다시 측정한다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "동굴로 돌아가 장비를 챙긴다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "준비를 갖췄다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "지도대로 선착장을 찾는다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "쓸 수 있는 보트를 발견했다.",
+            "failureText": "‘지도대로 선착장을 찾는다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "island-11",
+        "themeId": "island",
+        "round": 11,
+        "title": "구조선의 불빛",
+        "description": "수평선에 불빛이 보이기 시작한다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "해안에서 큰 불을 유지한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "발견될 가능성을 높였다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "보트로 가까이 간다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "구조선의 항로에 닿았다.",
+            "failureText": "‘보트로 가까이 간다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "신호탄을 모두 사용한다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "불빛이 방향을 바꿨다.",
+            "failureText": "‘신호탄을 모두 사용한다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "island-12",
+        "themeId": "island",
+        "round": 12,
+        "title": "마지막 선택",
+        "description": "구조선이 가까워졌지만 바람이 강하다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "안전하게 해안에서 기다린다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "무사히 구조됐다.",
+            "failureText": "‘안전하게 해안에서 기다린다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "보트를 타고 나아간다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "먼저 구조선에 도착했다.",
+            "failureText": "‘보트를 타고 나아간다’ 행동을 시도했지만 위험을 피하지 못했다. 거센 바람과 파도가 남은 물자를 쓸어 갔다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "신호를 계속 보낸다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "모두가 위치를 확인했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "medieval",
+    "name": "중세 도시",
+    "summary": "무너지는 도시의 시민으로서 질서와 생존을 선택하세요.",
+    "scenarios": [
+      {
+        "id": "medieval-01",
+        "themeId": "medieval",
+        "round": 1,
+        "title": "시장 광장의 소문",
+        "description": "성 밖에 역병이 번진다는 소문이 돈다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "가게를 일찍 닫는다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "손실을 줄였다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "약초를 사 둔다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "치료에 쓸 약초를 확보했다.",
+            "failureText": "‘약초를 사 둔다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "상인에게 정보를 산다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "정확한 이동 경로를 알았다.",
+            "failureText": "‘상인에게 정보를 산다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "medieval-02",
+        "themeId": "medieval",
+        "round": 2,
+        "title": "성문 앞의 행렬",
+        "description": "피난민들이 성문을 열어 달라고 외친다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "식량을 나눈다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "주민의 신뢰를 얻었다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "b",
+            "title": "성문 경비를 돕는다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "성벽 위 보상을 받았다.",
+            "failureText": "‘성문 경비를 돕는다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "임시 천막을 세운다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "피난민을 안전하게 분리했다.",
+            "failureText": "‘임시 천막을 세운다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "medieval-03",
+        "themeId": "medieval",
+        "round": 3,
+        "title": "비어 가는 창고",
+        "description": "도시의 곡물 창고가 예상보다 빨리 비고 있다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "외곽 농장과 거래한다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "새 곡물을 들여왔다.",
+            "failureText": "‘외곽 농장과 거래한다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "비상 식량을 숨긴다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "개인 몫을 지켰다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "배급표를 만든다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "식량 낭비가 줄었다.",
+            "failureText": "‘배급표를 만든다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "medieval-04",
+        "themeId": "medieval",
+        "round": 4,
+        "title": "세금 징수관",
+        "description": "영주가 방어 비용을 위해 세금을 올렸다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "기록을 검토한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "부당한 징수를 찾아냈다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "상인 조합과 협상한다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "세율을 낮추는 데 성공했다.",
+            "failureText": "‘상인 조합과 협상한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "성벽 보수에 직접 참여한다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "방어 장비를 받았다.",
+            "failureText": "‘성벽 보수에 직접 참여한다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "medieval-05",
+        "themeId": "medieval",
+        "round": 5,
+        "title": "우물의 이상",
+        "description": "공용 우물에서 이상한 냄새가 난다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "우물을 봉쇄한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "오염 확산을 막았다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "b",
+            "title": "새 우물을 판다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "안전한 물길을 만들었다.",
+            "failureText": "‘새 우물을 판다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "약초로 물을 정화한다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "급한 위기를 넘겼다.",
+            "failureText": "‘약초로 물을 정화한다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "medieval-06",
+        "themeId": "medieval",
+        "round": 6,
+        "title": "밤의 화재",
+        "description": "시장 골목에서 불이 번진다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "소방대를 조직한다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "불길을 초기에 잡았다.",
+            "failureText": "‘소방대를 조직한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "성문에 경보를 올린다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "지원 인력이 도착했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "상점 물건을 옮긴다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "많은 물자를 살렸다.",
+            "failureText": "‘상점 물건을 옮긴다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "medieval-07",
+        "themeId": "medieval",
+        "round": 7,
+        "title": "사라진 전령",
+        "description": "왕에게 보낼 전령이 돌아오지 않았다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "암호문을 다시 쓴다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "정보 유출 위험을 줄였다.",
+            "failureText": "‘암호문을 다시 쓴다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "a",
+            "title": "추적대를 보낸다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "전령과 문서를 되찾았다.",
+            "failureText": "‘추적대를 보낸다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "새 전령을 준비한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "지연을 최소화했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "medieval-08",
+        "themeId": "medieval",
+        "round": 8,
+        "title": "성벽의 균열",
+        "description": "비로 성벽 일부가 흔들린다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "석공을 고용한다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "성벽을 단단히 보수했다.",
+            "failureText": "‘석공을 고용한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "주민과 흙을 쌓는다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "무너질 구간을 막았다.",
+            "failureText": "‘주민과 흙을 쌓는다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "방어선을 뒤로 옮긴다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "피해 범위를 줄였다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "medieval-09",
+        "themeId": "medieval",
+        "round": 9,
+        "title": "축제의 제안",
+        "description": "사기를 높이기 위해 작은 축제를 열자는 의견이 나온다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "그 예산으로 약을 산다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "치료 물자가 늘었다.",
+            "failureText": "‘그 예산으로 약을 산다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "공개 회의를 연다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "주민 의견을 모았다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "축제를 연다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "도시 분위기가 살아났다.",
+            "failureText": "‘축제를 연다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "medieval-10",
+        "themeId": "medieval",
+        "round": 10,
+        "title": "침입 경보",
+        "description": "외곽에서 정체불명의 무리가 다가온다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "정찰병을 보낸다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "상황을 정확히 파악했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "성문을 잠근다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "침입을 막았다.",
+            "failureText": "‘성문을 잠근다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "대표와 대화한다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "그들은 피난민이었다.",
+            "failureText": "‘대표와 대화한다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "medieval-11",
+        "themeId": "medieval",
+        "round": 11,
+        "title": "왕의 답장",
+        "description": "왕실 지원대가 오려면 마지막 결정을 보내야 한다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "식량 지원을 요청한다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "도시가 버틸 시간을 얻었다.",
+            "failureText": "‘식량 지원을 요청한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "의료 지원을 요청한다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "역병 대응이 쉬워졌다.",
+            "failureText": "‘의료 지원을 요청한다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "기술자를 요청한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "성벽 수리가 빨라졌다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "medieval-12",
+        "themeId": "medieval",
+        "round": 12,
+        "title": "새로운 아침",
+        "description": "위기를 넘긴 뒤 도시의 우선순위를 정해야 한다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "시장을 다시 연다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "도시에 활기가 돌아왔다.",
+            "failureText": "‘시장을 다시 연다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "성벽을 완성한다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "도시를 안전하게 만들었다.",
+            "failureText": "‘성벽을 완성한다’ 행동을 시도했지만 위험을 피하지 못했다. 혼란 속에 자원과 거래 기회를 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "a",
+            "title": "공용 창고를 확충한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "다음 위기에 대비했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "space",
+    "name": "우주 탐사",
+    "summary": "귀환 연료가 줄어드는 탐사선에서 미지의 행성을 조사하세요.",
+    "scenarios": [
+      {
+        "id": "space-01",
+        "themeId": "space",
+        "round": 1,
+        "title": "미확인 신호",
+        "description": "탐사선이 외계 행성에서 반복 신호를 포착했다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "신호를 해독한다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "좌표 일부를 알아냈다.",
+            "failureText": "‘신호를 해독한다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "궤도를 낮춘다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "표면 사진을 얻었다.",
+            "failureText": "‘궤도를 낮춘다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "귀환 연료를 점검한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "안전 여유를 계산했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "space-02",
+        "themeId": "space",
+        "round": 2,
+        "title": "산소 경고",
+        "description": "재활용 장치 효율이 떨어지고 있다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "불필요한 구역을 차단한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "소모량을 줄였다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "c",
+            "title": "원인을 진단한다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "고장 위치를 찾았다.",
+            "failureText": "‘원인을 진단한다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "a",
+            "title": "예비 필터를 교체한다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "산소 농도가 안정됐다.",
+            "failureText": "‘예비 필터를 교체한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "space-03",
+        "themeId": "space",
+        "round": 3,
+        "title": "얼음 협곡",
+        "description": "표면에 물 얼음으로 보이는 지형이 있다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "먼저 지도를 만든다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "안전한 이동 경로가 생겼다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "탐사 로버를 보낸다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "얼음 성분을 확인했다.",
+            "failureText": "‘탐사 로버를 보낸다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "시료 드론을 발사한다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "귀중한 시료를 얻었다.",
+            "failureText": "‘시료 드론을 발사한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "space-04",
+        "themeId": "space",
+        "round": 4,
+        "title": "태양 폭풍",
+        "description": "강한 입자 폭풍이 접근 중이다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "차폐막을 가동한다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "장비 손상을 막았다.",
+            "failureText": "‘차폐막을 가동한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "동굴 지형에 착륙한다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "자연 차폐 공간을 찾았다.",
+            "failureText": "‘동굴 지형에 착륙한다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "민감 장비를 끈다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "전력과 장비를 아꼈다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "space-05",
+        "themeId": "space",
+        "round": 5,
+        "title": "검은 상자",
+        "description": "사라진 탐사선의 기록 장치가 발견됐다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "부품을 회수한다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "수리용 부품을 얻었다.",
+            "failureText": "‘부품을 회수한다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "위험 구역을 표시한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "사고 지점을 피할 수 있다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "기록을 복구한다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "안전한 귀환 항로를 찾았다.",
+            "failureText": "‘기록을 복구한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "space-06",
+        "themeId": "space",
+        "round": 6,
+        "title": "균열 난 창",
+        "description": "관측창에 미세 균열이 생겼다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "내부 압력을 낮춘다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "시간을 벌었다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "외부 수리를 한다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "완전히 봉합했다.",
+            "failureText": "‘외부 수리를 한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "보조 셔터를 닫는다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "압력 손실을 막았다.",
+            "failureText": "‘보조 셔터를 닫는다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "space-07",
+        "themeId": "space",
+        "round": 7,
+        "title": "생명 반응",
+        "description": "지하에서 미약한 유기 반응이 감지된다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "무인 장비로 채취한다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "오염 없이 시료를 얻었다.",
+            "failureText": "‘무인 장비로 채취한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "관측만 계속한다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "변화 패턴을 기록했다.",
+            "failureText": "‘관측만 계속한다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "격리 용기를 준비한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "안전하게 대응했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "space-08",
+        "themeId": "space",
+        "round": 8,
+        "title": "연료 선택",
+        "description": "귀환에 필요한 연료가 빠듯하다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "최단 항로를 계산한다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "연료 사용량을 줄였다.",
+            "failureText": "‘최단 항로를 계산한다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "추가 탐사를 포기한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "안전한 귀환을 확보했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "희귀 광물을 채굴한다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "연료 교환 자원을 얻었다.",
+            "failureText": "‘희귀 광물을 채굴한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "space-09",
+        "themeId": "space",
+        "round": 9,
+        "title": "AI 항법 오류",
+        "description": "항법 AI가 서로 다른 두 경로를 제시한다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "짧은 안전 경로를 택한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "위험을 줄였다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "수동으로 별을 확인한다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "올바른 경로를 골랐다.",
+            "failureText": "‘수동으로 별을 확인한다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "진단 프로그램을 돌린다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "오류 모듈을 고쳤다.",
+            "failureText": "‘진단 프로그램을 돌린다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "space-10",
+        "themeId": "space",
+        "round": 10,
+        "title": "미지의 구조물",
+        "description": "행성 표면에서 인공 구조물이 보인다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "외부를 스캔한다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "위험한 방어 장치를 피했다.",
+            "failureText": "‘외부를 스캔한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "통신 신호를 보낸다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "구조물의 문이 열렸다.",
+            "failureText": "‘통신 신호를 보낸다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "거리에서 관측한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "안전한 데이터를 모았다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "space-11",
+        "themeId": "space",
+        "round": 11,
+        "title": "귀환 창",
+        "description": "지구 귀환 창이 곧 닫힌다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "시료를 하나 더 챙긴다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "큰 발견을 남겼다.",
+            "failureText": "‘시료를 하나 더 챙긴다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "탐사 기록을 전송한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "데이터를 안전하게 보냈다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "즉시 귀환한다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "안전한 궤도에 올랐다.",
+            "failureText": "‘즉시 귀환한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "space-12",
+        "themeId": "space",
+        "round": 12,
+        "title": "푸른 행성",
+        "description": "창밖에 지구가 보인다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "시료를 격리한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "안전한 귀환 절차를 마쳤다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "연료를 아껴 착륙한다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "완벽하게 귀환했다.",
+            "failureText": "‘연료를 아껴 착륙한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "새 항로 데이터를 공개한다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "탐사 보상을 받았다.",
+            "failureText": "‘새 항로 데이터를 공개한다’ 행동을 시도했지만 위험을 피하지 못했다. 예상 밖의 장비 손상으로 탐사 자원을 소모했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "mansion",
+    "name": "미스터리 저택",
+    "summary": "잠긴 저택에서 사라진 유산의 진실을 밝혀 탈출하세요.",
+    "scenarios": [
+      {
+        "id": "mansion-01",
+        "themeId": "mansion",
+        "round": 1,
+        "title": "잠긴 현관",
+        "description": "폭우 속, 저택의 문이 저절로 닫혔다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "창문으로 주변을 본다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "정원 지도를 발견했다.",
+            "failureText": "‘창문으로 주변을 본다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "문양을 기록한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "반복되는 상징을 알아냈다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "현관 서랍을 조사한다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "작은 열쇠를 찾았다.",
+            "failureText": "‘현관 서랍을 조사한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "mansion-02",
+        "themeId": "mansion",
+        "round": 2,
+        "title": "멈춘 시계",
+        "description": "거실 시계는 자정에서 멈춰 있다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "소리를 따라간다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "복도 위치를 파악했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "시계를 고친다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "비밀 서랍이 열렸다.",
+            "failureText": "‘시계를 고친다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "시계 뒤를 살핀다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "숨겨진 메모를 찾았다.",
+            "failureText": "‘시계 뒤를 살핀다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "mansion-03",
+        "themeId": "mansion",
+        "round": 3,
+        "title": "초상화 복도",
+        "description": "눈동자 방향이 서로 다른 초상화들이 늘어서 있다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "눈동자가 향한 문을 연다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "도서관으로 이어졌다.",
+            "failureText": "‘눈동자가 향한 문을 연다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "액자 뒤를 확인한다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "암호 조각을 얻었다.",
+            "failureText": "‘액자 뒤를 확인한다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "복도 끝을 먼저 살핀다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "함정을 피했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "mansion-04",
+        "themeId": "mansion",
+        "round": 4,
+        "title": "낡은 도서관",
+        "description": "책장 사이에 비밀 통로가 있을 것 같다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "가계도를 읽는다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "유산의 주인을 알았다.",
+            "failureText": "‘가계도를 읽는다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "사다리로 위쪽을 찾는다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "숨은 상자를 발견했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "책 제목으로 암호를 푼다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "통로를 열었다.",
+            "failureText": "‘책 제목으로 암호를 푼다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "mansion-05",
+        "themeId": "mansion",
+        "round": 5,
+        "title": "와인 저장고",
+        "description": "바닥에는 물이 고여 있고 문은 잠겨 있다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "나무 상자를 밟고 건넌다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "젖지 않고 지나갔다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "배수 밸브를 연다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "안전하게 바닥을 비웠다.",
+            "failureText": "‘배수 밸브를 연다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "병의 연도를 비교한다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "비밀번호를 알아냈다.",
+            "failureText": "‘병의 연도를 비교한다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "mansion-06",
+        "themeId": "mansion",
+        "round": 6,
+        "title": "무도회장의 거울",
+        "description": "거울에는 없는 문이 비친다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "거울을 회전시킨다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "숨은 방이 드러났다.",
+            "failureText": "‘거울을 회전시킨다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "빛의 각도를 바꾼다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "문양을 읽을 수 있었다.",
+            "failureText": "‘빛의 각도를 바꾼다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "거울 주변을 살핀다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "안전장치를 해제했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "mansion-07",
+        "themeId": "mansion",
+        "round": 7,
+        "title": "사라진 하인",
+        "description": "하인의 일지 마지막 장이 찢겨 있다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "부엌을 조사한다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "비밀 통로 열쇠를 얻었다.",
+            "failureText": "‘부엌을 조사한다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "발자국을 따라간다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "새 단서를 확보했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "찢긴 조각을 맞춘다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "지하실 위치를 찾았다.",
+            "failureText": "‘찢긴 조각을 맞춘다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "mansion-08",
+        "themeId": "mansion",
+        "round": 8,
+        "title": "전기가 끊긴 방",
+        "description": "불이 꺼지고 문 잠금장치가 작동한다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "수동 잠금을 푼다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "문을 열었다.",
+            "failureText": "‘수동 잠금을 푼다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "a",
+            "title": "발전기를 고친다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "저택 전력이 돌아왔다.",
+            "failureText": "‘발전기를 고친다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "손전등 배터리를 아낀다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "어둠 속에서도 이동했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "mansion-09",
+        "themeId": "mansion",
+        "round": 9,
+        "title": "지하 온실",
+        "description": "희귀한 식물 사이에 금고가 놓여 있다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "식물 표본을 비교한다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "금고 암호를 찾았다.",
+            "failureText": "‘식물 표본을 비교한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "환기 장치를 켠다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "유해 가스를 없앴다.",
+            "failureText": "‘환기 장치를 켠다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "온실 지도를 가져간다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "다음 방의 힌트를 얻었다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "mansion-10",
+        "themeId": "mansion",
+        "round": 10,
+        "title": "가문의 재판",
+        "description": "녹음기에서 과거의 고백이 흘러나온다.",
+        "choices": [
+          {
+            "id": "b",
+            "title": "증거를 정리한다",
+            "requiredCost": 0,
+            "successProbability": 40,
+            "successNetChange": 490,
+            "failureNetChange": -230,
+            "successText": "유산의 행방을 추론했다.",
+            "failureText": "‘증거를 정리한다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "비밀 문을 찾는다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 40,
+            "failureNetChange": 0,
+            "successText": "탈출로를 확보했다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          },
+          {
+            "id": "a",
+            "title": "모든 녹음을 듣는다",
+            "requiredCost": 200,
+            "successProbability": 80,
+            "successNetChange": 200,
+            "failureNetChange": -380,
+            "successText": "진실을 완성했다.",
+            "failureText": "‘모든 녹음을 듣는다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          }
+        ]
+      },
+      {
+        "id": "mansion-11",
+        "themeId": "mansion",
+        "round": 11,
+        "title": "옥상의 신호",
+        "description": "옥상 문 너머로 새벽빛이 보인다.",
+        "choices": [
+          {
+            "id": "c",
+            "title": "마지막 암호를 푼다",
+            "requiredCost": 0,
+            "successProbability": 45,
+            "successNetChange": 560,
+            "failureNetChange": -290,
+            "successText": "유산 상자의 위치를 알았다.",
+            "failureText": "‘마지막 암호를 푼다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "a",
+            "title": "신호등을 켠다",
+            "requiredCost": 250,
+            "successProbability": 85,
+            "successNetChange": 220,
+            "failureNetChange": -460,
+            "successText": "밖에서 저택을 발견했다.",
+            "failureText": "‘신호등을 켠다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "정원 열쇠를 시험한다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 50,
+            "failureNetChange": 0,
+            "successText": "정문 잠금이 풀렸다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      },
+      {
+        "id": "mansion-12",
+        "themeId": "mansion",
+        "round": 12,
+        "title": "열린 출구",
+        "description": "출구와 유산 상자가 동시에 보인다.",
+        "choices": [
+          {
+            "id": "a",
+            "title": "증거를 들고 탈출한다",
+            "requiredCost": 150,
+            "successProbability": 75,
+            "successNetChange": 180,
+            "failureNetChange": -300,
+            "successText": "진실을 세상에 알렸다.",
+            "failureText": "‘증거를 들고 탈출한다’ 행동에 준비한 자원을 회수하지 못했다. 예상 밖의 장애로 물자를 손실했다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "b",
+            "title": "상자를 열어 본다",
+            "requiredCost": 0,
+            "successProbability": 35,
+            "successNetChange": 420,
+            "failureNetChange": -170,
+            "successText": "숨겨진 유산을 발견했다.",
+            "failureText": "‘상자를 열어 본다’ 행동을 시도했지만 위험을 피하지 못했다. 숨겨진 장치가 작동해 확보했던 자원을 잃었다.",
+            "isTimeoutDefault": false
+          },
+          {
+            "id": "c",
+            "title": "문을 열어 모두를 부른다",
+            "requiredCost": 0,
+            "successProbability": 100,
+            "successNetChange": 30,
+            "failureNetChange": 0,
+            "successText": "안전하게 저택을 나왔다.",
+            "failureText": "안전을 확보하며 다음 기회를 기다렸다.",
+            "isTimeoutDefault": true
+          }
+        ]
+      }
+    ]
+  }
+]

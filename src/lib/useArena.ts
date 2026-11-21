@@ -1,3 +1,4 @@
+import { callGame } from "./gameApi";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   GoogleAuthProvider,
@@ -184,14 +185,43 @@ export function useArena() {
     login: () =>
       run("로그인 중", () => signInWithPopup(auth, new GoogleAuthProvider())),
     logout: () => run("로그아웃 중", () => signOut(auth)),
-    saveNickname: (nickname: string) =>
+    run,
+    saveNickname: (
+      nickname: string,
+      avatarId = "sprout",
+      rankingAnonymous = false,
+    ) =>
       user &&
       run("닉네임 저장 중", () =>
-        saveProfile(db, user.uid, nickname, user.email),
+        saveProfile(
+          db,
+          user.uid,
+          nickname,
+          user.email,
+          avatarId,
+          rankingAnonymous,
+        ),
       ),
-    create: () => user && run("방 만드는 중", () => createRoom(db, user.uid)),
+    create: (maxPlayers: number) =>
+      user &&
+      run("방 만드는 중", async () => {
+        const createdCode = await createRoom(
+          db, user.uid, undefined, maxPlayers,
+        );
+        // The committed transaction is authoritative. Update the local route
+        // immediately instead of waiting for a delayed mobile onSnapshot.
+        setSession({ roomCode: createdCode });
+      }),
+    start: () =>
+      code && run("경기 시작 중", () => callGame("start", { roomCode: code })),
     join: (input: string) =>
-      user && run("방에 참가하는 중", () => joinRoom(db, user.uid, input)),
+      user &&
+      run("방에 참가하는 중", async () => {
+        const joinedCode = await joinRoom(db, user.uid, input);
+        // Never navigate optimistically before Firestore has confirmed join.
+        // This avoids appearing stuck on /play on slower mobile connections.
+        setSession({ roomCode: joinedCode });
+      }),
     leave: () => user && run("방 나가는 중", () => leaveRoom(db, user.uid)),
     ready: (value: boolean) =>
       user &&

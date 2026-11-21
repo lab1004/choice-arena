@@ -1,0 +1,6 @@
+{
+  "maxPlayers": 3,
+  "startingCoins": 1000,
+  "roomCodeLength": 6,
+  "roomCodeAlphabet": "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+}
